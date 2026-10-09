@@ -1,0 +1,260 @@
+/* ======================================================================
+   Sélecteur de projets (ProjectSwitcher) — onglets façon Qeeps :
+   rail #F2F3F4, indicateur blanc qui glisse, transitions en cascade.
+   --dir vaut 1 (suivant) ou -1 (précédent).
+   ====================================================================== */
+.pswitch { --dir: 1; display: flex; flex-direction: column; gap: 16px; }
+
+/* la barre passe au-dessus de la carte : les aperçus flottent par-dessus la vidéo */
+.pswitch__bar { position: relative; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.pswitch__tabs {
+  position: relative;
+  display: flex; gap: 2px;
+  padding: 5px;
+  border-radius: 16px;
+  background: var(--color-block);
+  min-width: 0;
+}
+.pswitch__indicator {
+  --ring: 0;
+  position: absolute; top: 5px; bottom: 5px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(22, 73, 81, 0.05), 0 8px 20px -10px rgba(22, 73, 81, 0.35);
+  overflow: hidden;
+  /* les transitions de left/right sont posées en JS selon le sens (effet liquide) */
+  will-change: left, right;
+}
+/* progression du mode story : fine barre en bas de l'onglet actif */
+.pswitch__indicator::after {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: 5px;
+  height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+  transform-origin: left; transform: scaleX(var(--ring));
+}
+.pswitch__indicator::before {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: 5px;
+  height: 2px; border-radius: 2px; background: #eef1f2;
+}
+.pswitch__tab {
+  position: relative; z-index: 1;
+  display: inline-flex; align-items: baseline; gap: 8px;
+  height: 44px; padding: 0 18px;
+  border: 0; border-radius: 12px;
+  background: transparent;
+  color: var(--color-muted);
+  font: 500 14px/44px var(--font-family);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+.pswitch__tab:hover { color: var(--color-primary); }
+.pswitch__tab.is-active { color: var(--color-primary); }
+.pswitch__num {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted); opacity: 0.7;
+  transition: color 0.3s ease, opacity 0.3s ease;
+}
+.pswitch__tab.is-active .pswitch__num { color: var(--color-primary-light); opacity: 1; }
+.pswitch__name { font-weight: 500; transition: font-weight 0.2s; }
+.pswitch__tab.is-active .pswitch__name { font-weight: 600; }
+
+.pswitch__nav { display: flex; align-items: center; gap: 8px; flex: none; }
+.pswitch__count { margin-right: 6px; font-size: 14px; font-weight: 600; color: var(--color-primary); font-variant-numeric: tabular-nums; overflow: hidden; display: inline-flex; }
+.pswitch__count-num { display: inline-block; animation: pswitch-count 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+.pswitch__count-total { color: var(--color-muted); font-weight: 500; white-space: pre; }
+@keyframes pswitch-count { from { transform: translateY(calc(var(--dir) * 100%)); opacity: 0; } to { transform: none; opacity: 1; } }
+.pswitch__arrow {
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border: 0; border-radius: 12px;
+  background: var(--color-block);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease,
+    translate 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pswitch__arrow svg { width: 18px; height: 18px; stroke-width: 2.2; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+.pswitch__arrow:hover { background: #fff; box-shadow: 0 0 0 1px rgba(22, 73, 81, 0.06), 0 8px 20px -10px rgba(22, 73, 81, 0.35); }
+.pswitch__arrow:first-of-type:hover svg { transform: translateX(-2px); }
+.pswitch__arrow:last-of-type:hover svg { transform: translateX(2px); }
+.pswitch__arrow:active { transform: scale(0.94); }
+
+.pswitch__arrow { position: relative; }
+
+/* aperçu flottant d'un projet (onglets et flèches) */
+.pswitch__peek {
+  position: absolute; z-index: 30; top: calc(100% + 12px);
+  display: flex; flex-direction: column; gap: 10px;
+  width: 248px; padding: 8px 8px 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  box-shadow: 0 0 0 1px rgba(22, 73, 81, 0.06), 0 24px 48px -18px rgba(22, 73, 81, 0.45), 0 6px 14px -8px rgba(22, 73, 81, 0.2);
+  text-align: left; white-space: normal;
+  opacity: 0; transform: translateY(-8px) scale(0.94) rotate(var(--peek-rot, 1.5deg));
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.5s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.pswitch__peek--right { right: 0; transform-origin: top right; }
+.pswitch__peek--left { left: 0; transform-origin: top left; --peek-rot: -1.5deg; }
+.pswitch__arrow:hover .pswitch__peek, .pswitch__tab:hover .pswitch__peek { opacity: 1; transform: none; transition-delay: 0.08s; }
+.pswitch__arrow .pswitch__peek svg, .pswitch__arrow:hover .pswitch__peek svg { transform: none; }
+.pswitch__peek-thumb {
+  display: block; width: 100%; aspect-ratio: 1920 / 1026;
+  border-radius: 11px; overflow: hidden; background: #e1e6e7;
+}
+.pswitch__peek-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; transform: scale(1.08); transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+.pswitch__arrow:hover .pswitch__peek-thumb img, .pswitch__tab:hover .pswitch__peek-thumb img { transform: none; }
+.pswitch__peek-text { display: flex; flex-direction: column; gap: 3px; padding: 0 6px; }
+.pswitch__peek-text small { font-size: 11px; line-height: 1.2; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-primary-light); }
+.pswitch__peek-text strong { font-size: 15px; line-height: 1.3; font-weight: 600; color: var(--color-primary); }
+.pswitch__peek-text em { font-style: normal; font-size: 12.5px; line-height: 1.4; font-weight: 500; color: var(--color-muted); }
+
+/* ---- La carte : fond fixe, seul le contenu change ---- */
+.pswitch__viewport {
+  position: relative;
+  box-sizing: content-box;
+  padding: 12px;
+  border-radius: var(--radius-block);
+  background: var(--color-block);
+  transition: height 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  isolation: isolate;
+}
+/* halo qui suit le curseur */
+.pswitch__viewport::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 70%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.pswitch__viewport:hover::before { opacity: 1; }
+/* vague de lumière qui traverse la carte dans le sens de la navigation */
+.pswitch__wave {
+  position: absolute; inset: 0; z-index: -1;
+  border-radius: inherit; overflow: hidden; pointer-events: none;
+}
+.pswitch__wave::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 60%;
+  left: calc(50% - 30%);
+  background: linear-gradient(90deg, rgba(33, 139, 156, 0), rgba(33, 139, 156, 0.14), rgba(33, 139, 156, 0));
+  animation: pswitch-wave 1.1s cubic-bezier(0.45, 0, 0.2, 1) forwards;
+}
+@keyframes pswitch-wave {
+  from { transform: translateX(calc(var(--dir) * 140%)); opacity: 1; }
+  to { transform: translateX(calc(var(--dir) * -140%)); opacity: 0.2; }
+}
+
+.pswitch__slide { position: relative; }
+.pswitch__slide.is-waiting { opacity: 0; }
+.pswitch__slide.is-leaving {
+  position: absolute; top: 12px; left: 12px; right: 12px;
+  pointer-events: none;
+}
+
+/* ---- Sortie : les infos glissent et se floutent, la fenêtre recule comme une carte qu'on range ---- */
+.pswitch__slide.is-leaving .pstage__info { animation: pswitch-leave 0.38s cubic-bezier(0.55, 0, 0.75, 0.2) forwards; }
+.pswitch__slide.is-leaving .pstage__visual {
+  transform-origin: 50% 100%;
+  animation: pswitch-leave-frame 0.42s cubic-bezier(0.55, 0, 0.75, 0.2) forwards;
+}
+@keyframes pswitch-leave {
+  to { opacity: 0; transform: translateX(calc(var(--dir) * -28px)); filter: blur(6px); }
+}
+@keyframes pswitch-leave-frame {
+  to { opacity: 0; transform: perspective(1400px) translateX(calc(var(--dir) * -60px)) translateZ(-120px) rotateY(calc(var(--dir) * 12deg)) rotate(calc(var(--dir) * -3deg)); filter: blur(4px); }
+}
+
+/* ---- Entrée ---- */
+:root { --pswitch-ease: cubic-bezier(0.22, 1, 0.36, 1); --pswitch-spring: cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* lignes simples (statut, rôle, boutons) */
+.pswitch__slide.is-entering .pstage__in {
+  animation: pswitch-enter 0.7s var(--pswitch-ease) backwards;
+  animation-delay: calc(0.14s + var(--i, 0) * 0.06s);
+}
+@keyframes pswitch-enter {
+  from { opacity: 0; transform: translateX(calc(var(--dir) * 32px)); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+/* titre : chaque lettre se lève et se redresse, avec un léger flou */
+.pswitch__slide.is-entering .pstage__char {
+  animation: pswitch-char 0.8s var(--pswitch-ease) backwards;
+  animation-delay: calc(0.16s + var(--c) * 0.028s);
+}
+@keyframes pswitch-char {
+  from { opacity: 0; transform: translateY(0.55em) rotate(calc(var(--dir) * 12deg)) scale(0.7); filter: blur(8px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+/* description : les mots apparaissent comme s'ils étaient écrits */
+.pswitch__slide.is-entering .pstage__w {
+  animation: pswitch-word 0.55s ease-out backwards;
+  animation-delay: calc(0.3s + var(--w) * 0.014s);
+}
+@keyframes pswitch-word {
+  from { opacity: 0; transform: translateY(6px); filter: blur(5px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+/* logos de la stack : petits pops en ressort */
+.pswitch__slide.is-entering .pstage__tech {
+  animation: pswitch-pop 0.6s var(--pswitch-spring) backwards;
+  animation-delay: calc(0.5s + var(--t) * 0.04s);
+}
+@keyframes pswitch-pop {
+  from { opacity: 0; transform: scale(0.3) rotate(calc(var(--dir) * -20deg)); }
+  to { opacity: 1; transform: none; }
+}
+/* fenêtre : elle sort de la pile et se pose */
+.pswitch__slide.is-entering .pstage__frame {
+  animation: pswitch-frame 0.95s 0.12s var(--pswitch-ease) backwards;
+}
+@keyframes pswitch-frame {
+  from { opacity: 0; transform: perspective(1400px) translateX(calc(var(--dir) * 70px)) translateZ(-140px) rotateY(calc(var(--dir) * -14deg)) rotate(calc(var(--dir) * 3deg)); }
+  to { opacity: 1; transform: perspective(1200px); }
+}
+/* l'écran se dévoile comme un rideau dans le sens de la navigation */
+.pswitch__slide.is-entering .pstage__screen {
+  animation: pswitch-curtain 1s 0.3s cubic-bezier(0.65, 0, 0.35, 1) backwards;
+}
+@keyframes pswitch-curtain {
+  from { clip-path: inset(0 calc(50% - var(--dir) * 50%) 0 calc(50% + var(--dir) * 50%)); }
+  to { clip-path: inset(0 0 0 0); }
+}
+/* chiffres clés : montée en ressort, l'icône fait un tour */
+.pswitch__slide.is-entering .pstage__key {
+  animation: pswitch-key 0.75s var(--pswitch-ease) backwards;
+  animation-delay: calc(0.55s + var(--k) * 0.09s);
+}
+.pswitch__slide.is-entering .pstage__key-icon {
+  animation: pswitch-icon 0.9s var(--pswitch-spring) backwards;
+  animation-delay: calc(0.65s + var(--k) * 0.09s);
+}
+@keyframes pswitch-key {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pswitch-icon {
+  from { transform: rotate(calc(var(--dir) * -120deg)) scale(0.4); }
+  to { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pswitch__slide.is-leaving { display: none; }
+  .pswitch__slide.is-entering *, .pswitch__wave::after { animation: none !important; }
+  .pswitch__slide.is-waiting { opacity: 1; }
+  .pswitch__viewport, .pswitch__indicator { transition: none; }
+}
+
+@media (max-width: 760px) {
+  .pswitch__bar { flex-direction: column; align-items: stretch; }
+  .pswitch__nav { justify-content: flex-end; }
+  .pswitch__tabs { overflow-x: auto; scrollbar-width: none; }
+  .pswitch__tabs::-webkit-scrollbar { display: none; }
+  .pswitch__tab { height: 40px; padding: 0 14px; font-size: 13px; line-height: 40px; }
+  .pswitch__peek { display: none; }
+  .pswitch__viewport { padding: 10px; }
+  .pswitch__slide.is-leaving { top: 10px; left: 10px; right: 10px; }
+}

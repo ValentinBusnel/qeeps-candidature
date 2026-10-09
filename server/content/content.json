@@ -1,0 +1,607 @@
+{
+  "profile": {
+    "_id": "6ac6110e4eafba34a48a4e98",
+    "seedVersion": 4,
+    "fullName": "Valentin Busnel",
+    "createdAt": "2026-10-09T17:06:56.285Z",
+    "updatedAt": "2026-10-09T17:27:16.553Z",
+    "email": "valentinbusnel.contact@gmail.com",
+    "summary": [
+      "Développeur avec une forte appétence pour React et TypeScript, technologies que j'utilise en contexte professionnel et sur mes projets personnels. Expérience en développement d'applications web, traitement et exploitation de données, avec une réelle autonomie dans la conception, la résolution de problèmes et la mise en production.",
+      "Mon expérience chez STG m'a permis de travailler sur des environnements de production exigeants, de collaborer directement avec les équipes métier et de développer une solide culture de la qualité, de la fiabilité et de la donnée.",
+      "Je souhaite aujourd'hui me concentrer davantage sur le développement produit et approfondir mon expertise React / TypeScript, tout en développant mes compétences back-end sur l'écosystème Node.js."
+    ],
+    "skills": [
+      {
+        "category": "Front-end",
+        "items": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "Angular",
+          "Tailwind CSS",
+          "shadcn/ui"
+        ]
+      },
+      {
+        "category": "Back-end",
+        "items": [
+          "Java",
+          "Spring Boot",
+          "Spring Batch",
+          "Ruby",
+          "Ruby on Rails",
+          "API REST"
+        ]
+      },
+      {
+        "category": "Data & bases de données",
+        "items": [
+          "SQL",
+          "PostgreSQL",
+          "MySQL",
+          "Snowflake",
+          "Talend",
+          "ETL / ELT",
+          "Power BI"
+        ]
+      },
+      {
+        "category": "Développement & outils",
+        "items": [
+          "Git",
+          "GitHub",
+          "Vite",
+          "Claude Code"
+        ]
+      },
+      {
+        "category": "Cloud",
+        "items": [
+          "Azure Blob Storage"
+        ]
+      }
+    ],
+    "experiences": [
+      {
+        "company": "Groupe STG",
+        "id": "stg",
+        "role": "Data / Analyste programmeur",
+        "contract": "CDI",
+        "period": "Oct. 2023 – Fév. 2026",
+        "mode": "Hybride",
+        "summary": "Au cœur des données du groupe : je fiabilisais les flux Talend vers Snowflake et faisais évoluer l'application du référentiel des tiers, du diagnostic jusqu'à la mise en production.",
+        "groups": [
+          {
+            "title": "Data Engineering — activité principale",
+            "bullets": [
+              "Conception et maintenance de flux d'extraction, transformation et chargement de données avec Talend.",
+              "Intégration, qualification et fiabilisation des données dans le Data Warehouse Snowflake.",
+              "Développement et maintenance de flux d'échanges avec des applications internes et externes.",
+              "Développement d'exports automatisés vers Azure Blob Storage.",
+              "Analyse et nettoyage de données afin de garantir leur qualité et leur exploitabilité.",
+              "Utilisation intensive de SQL pour l'analyse, la transformation et la qualification des données.",
+              "Création de tableaux de bord et d'outils d'exploitation avec Power BI et Python / Streamlit."
+            ]
+          },
+          {
+            "title": "Développement applicatif",
+            "bullets": [
+              "Maintenance et évolution d'une application interne de référentiel des tiers.",
+              "Diagnostic et correction de problèmes rencontrés en production, jusqu'à l'intervention directement dans le code.",
+              "Développement autonome de corrections et évolutions.",
+              "Validation des modifications en préproduction puis mise en production.",
+              "Développement ponctuel de nouvelles fonctionnalités sur des applications internes.",
+              "Collaboration directe avec les utilisateurs et équipes métier pour comprendre les besoins et résoudre les problématiques rencontrées."
+            ]
+          }
+        ],
+        "env": [
+          "Talend",
+          "SQL",
+          "Snowflake",
+          "Python",
+          "Streamlit",
+          "Power BI",
+          "Java",
+          "Spring Boot",
+          "Spring Batch",
+          "Angular",
+          "Azure Blob Storage"
+        ],
+        "logoUrl": "/logos/stg.png"
+      },
+      {
+        "company": "OÏA App",
+        "id": "oia",
+        "role": "Développeur front-end",
+        "contract": "Freelance",
+        "period": "Déc. 2021 – Fév. 2023",
+        "mode": "Full remote",
+        "summary": "Développement front-end d'une plateforme web avec une forte autonomie sur l'implémentation des interfaces et fonctionnalités.",
+        "groups": [
+          {
+            "title": "Missions",
+            "bullets": [
+              "Développement et évolution d'interfaces avec React et TypeScript.",
+              "Développement autonome de composants et fonctionnalités de bout en bout.",
+              "Intégration et consommation d'API.",
+              "Utilisation de hooks, props, formulaires, routing et gestion d'état.",
+              "Refactorisation de composants pour améliorer la maintenabilité et les performances.",
+              "Collaboration directe avec l'équipe produit."
+            ]
+          }
+        ],
+        "env": [
+          "React",
+          "TypeScript",
+          "JavaScript"
+        ],
+        "logoUrl": "/logos/oia.png"
+      }
+    ],
+    "education": [
+      {
+        "school": "Le Wagon",
+        "title": "Bootcamp développement web",
+        "period": "Oct. 2021 – Déc. 2021",
+        "description": "Formation intensive au développement web.",
+        "tags": [
+          "Ruby on Rails",
+          "MySQL"
+        ],
+        "badge": "Certifié"
+      },
+      {
+        "school": "Autodidacte",
+        "title": "Développement full stack & Data Engineering",
+        "period": "Formation continue",
+        "description": "Approfondissement des technologies web et data à travers des projets personnels et professionnels.",
+        "tags": [
+          "React",
+          "Node.js",
+          "Data"
+        ],
+        "badge": ""
+      }
+    ],
+    "stats": [
+      {
+        "value": 4,
+        "label": "d'expérience\nen développement",
+        "prefix": "+",
+        "suffix": " ans"
+      },
+      {
+        "value": 2,
+        "label": "en production\nchez STG",
+        "prefix": "+",
+        "suffix": " ans"
+      },
+      {
+        "value": 22,
+        "label": "technologies\nutilisées",
+        "prefix": "+"
+      },
+      {
+        "value": 100,
+        "label": "motivé\npour Qeeps",
+        "suffix": "%"
+      }
+    ],
+    "sections": {
+      "heroButtons": {
+        "secondary": "À propos de ce site",
+        "primary": "Me contacter"
+      },
+      "stack": {
+        "overline": "Stack technique",
+        "title": "Les technologies que j'utilise déjà"
+      },
+      "profile": {
+        "overline": "Profil",
+        "title": "Qui suis-je ?"
+      },
+      "features": {
+        "overline": "Comment je travaille ?",
+        "title": "Un développeur opérationnel",
+        "titleSecondLine": "dès le premier jour",
+        "blocks": [
+          {
+            "title": "Proche des équipes métier",
+            "text": "Chez STG, je collabore **directement** avec les utilisateurs et les équipes métier pour comprendre leurs besoins et résoudre leurs problèmes en production."
+          },
+          {
+            "title": "Une stack complète",
+            "text": "React et TypeScript côté produit, Java et API REST côté serveur, SQL et Snowflake côté données : de quoi livrer une fonctionnalité de **bout en bout**."
+          },
+          {
+            "title": "Un parcours qualifié",
+            "text": "Plus de 2 ans en CDI sur des environnements de production exigeants, après une expérience **freelance** en React / TypeScript."
+          },
+          {
+            "title": "Formé et autodidacte",
+            "text": "Bootcamp **Le Wagon**, puis une formation continue sur le web et la data à travers mes projets personnels et professionnels."
+          },
+          {
+            "title": "Ma candidature",
+            "text": "Mon CV, la lettre de recommandation de mon ancien responsable et ma lettre de motivation : **tout mon dossier**, à portée de clic.",
+            "visual": "docs"
+          }
+        ],
+        "messages": [
+          {
+            "from": "Gestion des tiers",
+            "source": "Prod",
+            "text": "Bonjour Valentin, l'export du référentiel des tiers n'a pas tourné cette nuit : mes modifications d'hier ne sont pas en base. Tu peux regarder ?"
+          },
+          {
+            "from": "Product Owner",
+            "source": "Évolution",
+            "text": "On aimerait ajouter un export Excel des commandes dans l'appli Angular. Tu peux nous chiffrer ça pour le prochain sprint ?"
+          },
+          {
+            "from": "Contrôle de gestion",
+            "source": "Reporting",
+            "text": "Les chiffres de mars dans Power BI ne collent pas avec ceux de Snowflake. Tu pourrais vérifier la requête du CA par agence ?"
+          },
+          {
+            "from": "Partenaire logistique",
+            "source": "Flux",
+            "text": "À partir de lundi, nos fichiers de livraison passent au nouveau format CSV avec deux colonnes en plus. Vous trouverez la spec en pièce jointe."
+          },
+          {
+            "from": "Exploitation transport",
+            "source": "Support",
+            "text": "Merci pour le correctif d'hier, le suivi des tournées remonte de nouveau parfaitement !"
+          }
+        ],
+        "tiles": [
+          {
+            "icon": "code",
+            "value": "React",
+            "unit": "",
+            "label": "Front-end"
+          },
+          {
+            "icon": "check",
+            "value": "TS",
+            "unit": "",
+            "label": "TypeScript"
+          },
+          {
+            "icon": "database",
+            "value": "SQL",
+            "unit": "",
+            "label": "Data & qualité"
+          },
+          {
+            "icon": "server",
+            "value": "API",
+            "unit": "REST",
+            "label": "Back-end"
+          }
+        ]
+      },
+      "stats": {
+        "overline": "Quelques chiffres",
+        "title": "Un profil déjà éprouvé en production"
+      },
+      "projects": {
+        "overline": "Projets perso",
+        "title": "Ce que je construis à côté"
+      },
+      "parcours": {
+        "overline": "Parcours",
+        "title": "Mes expériences en détail"
+      },
+      "reasons": {
+        "overline": "Pourquoi moi",
+        "title": "Ce que j'apporterai à l'équipe"
+      },
+      "cta": {
+        "title": "Pas encore convaincu ?",
+        "subtitle": "Planifiez dès maintenant un échange avec Valentin.",
+        "button": "Me contacter"
+      }
+    },
+    "firstName": "Valentin",
+    "title": "Développeur Full Stack — React / TypeScript",
+    "location": "Paris · Mobilité France entière",
+    "phone": "06 37 45 71 82",
+    "github": "",
+    "linkedin": "",
+    "cvUrl": "/uploads/candidature/cv-valentin-busnel-c997e6.pdf",
+    "hero": {
+      "titleTop": "Développeur Full Stack",
+      "titleBottom": "React & TypeScript",
+      "subtitle": "Candidature pour rejoindre l'équipe Qeeps : je conçois, développe et mets en production des applications web, du front-end jusqu'à la donnée."
+    },
+    "languages": [
+      {
+        "name": "Anglais",
+        "level": "Intermédiaire professionnel"
+      },
+      {
+        "name": "Espagnol",
+        "level": "Notions"
+      }
+    ],
+    "reasons": [
+      {
+        "icon": "rocket",
+        "title": "Autonome en production",
+        "text": "Diagnostiquer, corriger, valider en préprod puis livrer : c'était mon quotidien chez STG."
+      },
+      {
+        "icon": "code",
+        "title": "React & TypeScript",
+        "text": "Ma stack de prédilection, utilisée en freelance comme sur mes projets personnels."
+      },
+      {
+        "icon": "users",
+        "title": "Proche du métier",
+        "text": "J'ai l'habitude de travailler directement avec les utilisateurs pour comprendre leurs besoins."
+      },
+      {
+        "icon": "database",
+        "title": "Culture de la donnée",
+        "text": "Qualité, fiabilité, SQL : un vrai atout pour un produit qui traite des milliers de dossiers."
+      },
+      {
+        "icon": "server",
+        "title": "Envie de Node.js",
+        "text": "Je veux approfondir le back-end sur l'écosystème Node.js, au plus près du produit."
+      }
+    ],
+    "avatarUrl": "/avatar-valentin.png",
+    "about": {
+      "overline": "À propos de ce site",
+      "title": "Un site créé pour une seule candidature",
+      "paragraphs": [
+        "J'ai conçu et développé ce site uniquement pour ma candidature chez Qeeps. Plutôt qu'un CV de plus, j'ai voulu vous montrer concrètement comment je travaille.",
+        "Il reprend volontairement l'identité de byqeeps.com : typographies, couleurs, espacements et animations. Il n'est ni affilié à Qeeps ni validé par l'équipe."
+      ],
+      "points": [
+        {
+          "icon": "code",
+          "text": "React, TypeScript, Node.js, Express et MongoDB, avec un back-office complet."
+        },
+        {
+          "icon": "clock",
+          "text": "Temporaire : il sera mis hors ligne à la fin du processus de recrutement, quelle qu'en soit l'issue."
+        },
+        {
+          "icon": "mail",
+          "text": "Les messages envoyés depuis le formulaire servent uniquement à me contacter et seront supprimés avec le site."
+        }
+      ],
+      "primary": "Me contacter",
+      "secondary": "Fermer"
+    },
+    "documents": [
+      {
+        "id": "cv",
+        "kind": "pdf",
+        "label": "CV",
+        "title": "Mon CV",
+        "caption": "Full Stack & Data Engineer · 1 page",
+        "tone": "cyan",
+        "file": "/uploads/candidature/cv-valentin-busnel-c997e6.pdf"
+      },
+      {
+        "id": "recommandation",
+        "kind": "pdf",
+        "label": "Recommandation",
+        "title": "Lettre de recommandation",
+        "caption": "Thierry Bouyer, responsable du pôle Data",
+        "tone": "sand",
+        "file": "/uploads/candidature/lettre-de-recommandation.pdf"
+      },
+      {
+        "id": "motivation",
+        "kind": "letter",
+        "label": "Motivation",
+        "title": "Lettre de motivation",
+        "caption": "Pour l'équipe Qeeps",
+        "tone": "pink",
+        "place": "",
+        "greeting": "Bonjour Ilan,",
+        "body": "Mon parcours m'a amené à explorer plusieurs facettes du développement, de la création d'interfaces en React à la Data Engineering, en passant par le développement d'applications métier. Aujourd'hui, j'ai envie de redonner une place centrale au développement produit, avec React et TypeScript, tout en continuant à apprendre et à élargir mes compétences côté back-end.\n\nCe qui m'attire chez Qeeps, c'est la possibilité de contribuer à un produit concret, avec une stack qui me correspond et de belles perspectives d'apprentissage. C'est une opportunité qui s'inscrit naturellement dans la direction que je souhaite donner à mon parcours.\n\nMarc-Étienne m'a parlé de cette opportunité et m'a encouragé à vous présenter ma candidature. Ses retours positifs ont renforcé mon envie d'en savoir davantage et de pouvoir échanger avec vous sur la possibilité de rejoindre Qeeps.",
+        "closing": "À bientôt,",
+        "signature": "Valentin Busnel"
+      }
+    ]
+  },
+  "projects": [
+    {
+      "_id": "6ac6110e4eafba34a48a4e9b",
+      "slug": "anasawi",
+      "title": "Anasawi",
+      "order": 1,
+      "createdAt": "2026-10-07T12:22:35.364Z",
+      "updatedAt": "2026-10-08T11:38:00.048Z",
+      "tagline": "Le site d'une Gestalt-thérapeute et son back-office sur mesure",
+      "description": "Le site d'Anne Winzenried, Gestalt-thérapeute à Cesson-Sévigné, et l'outil qui va avec : un back-office sur mesure qui lui permet de composer ses pages, d'ajuster ses couleurs et de répondre à ses messages, sans jamais toucher au code.",
+      "role": "Conception, design et développement",
+      "year": "2026",
+      "status": "En cours",
+      "stack": [
+        "React",
+        "TypeScript",
+        "Next.js",
+        "Tailwind CSS"
+      ],
+      "highlights": [
+        "Autonome sur son site — Anne compose ses pages avec des sections prêtes à l'emploi, aperçu mobile et enregistrement automatique, sans jamais m'appeler",
+        "Son identité, pas un template — couleurs, typographies et menu se règlent depuis l'administration, le site reste le sien",
+        "Aucune demande perdue — le formulaire de contact arrive dans une messagerie intégrée à son back-office"
+      ],
+      "links": [
+        {
+          "label": "Voir le site",
+          "url": "https://anasawi.com"
+        }
+      ],
+      "media": [
+        {
+          "type": "video",
+          "src": "/uploads/projets-anasawi/web/mobile.mp4",
+          "poster": "/uploads/projets-anasawi/web/mobile.jpg",
+          "caption": "Mobile & desktop"
+        },
+        {
+          "type": "video",
+          "src": "/uploads/projets-anasawi/web/admin-cadre.mp4",
+          "poster": "/uploads/projets-anasawi/web/admin-cadre.jpg",
+          "caption": "Le back-office en action"
+        }
+      ],
+      "featured": true,
+      "badges": [
+        {
+          "icon": "globe",
+          "value": "En ligne",
+          "label": "anasawi.com, pour une amie thérapeute"
+        },
+        {
+          "icon": "user",
+          "value": "Seul, de A à Z",
+          "label": "Conception, design & développement"
+        },
+        {
+          "icon": "gear",
+          "value": "Back-office sur mesure",
+          "label": "Elle modifie son site sans moi"
+        }
+      ]
+    },
+    {
+      "_id": "6ac6b145984700a5357601c9",
+      "slug": "ambre-clement",
+      "title": "Ambre Clément",
+      "order": 2,
+      "createdAt": "2026-10-09T09:36:16.985Z",
+      "updatedAt": "2026-10-09T09:36:16.985Z",
+      "tagline": "Portfolio photo et back-office sur mesure, refonte d'un site Wix",
+      "description": "Le portfolio de la photographe Ambre Clément, refait de zéro à partir de son ancien site Wix : des galeries rapides et bien référencées, et un back-office pour qu'elle publie ses photos, organise ses onglets et suive la fréquentation de son site en toute autonomie.",
+      "role": "Conception, design et développement",
+      "year": "2026",
+      "status": "En ligne",
+      "stack": [
+        "React",
+        "Next.js",
+        "TypeScript",
+        "Tailwind CSS",
+        "Shadcn/UI",
+        "PostgreSQL",
+        "Cloudflare R2"
+      ],
+      "highlights": [
+        "Fini la dépendance à Wix — Ambre gère seule ses onglets, ses galeries par glisser-déposer, ses projets et ses tarifs",
+        "Des photos HD, un site rapide — chaque image est convertie en AVIF/WebP en plusieurs tailles et servie par le CDN Cloudflare",
+        "Visible et mesurable — référencement généré automatiquement (SSR, JSON-LD, sitemap) et statistiques de visite dans son tableau de bord"
+      ],
+      "links": [
+        {
+          "label": "Voir le site",
+          "url": "https://ambreclement.com"
+        }
+      ],
+      "media": [
+        {
+          "type": "video",
+          "src": "/uploads/projets-ambre-clement/web/site.mp4",
+          "caption": "Le site, ordinateur & mobile",
+          "poster": "/uploads/projets-ambre-clement/web/site.jpg"
+        },
+        {
+          "type": "video",
+          "src": "/uploads/projets-ambre-clement/web/admin.mp4",
+          "caption": "Le back-office",
+          "poster": "/uploads/projets-ambre-clement/web/admin.jpg"
+        }
+      ],
+      "badges": [
+        {
+          "icon": "globe",
+          "value": "En ligne",
+          "label": "ambreclement.com, refonte de son site Wix"
+        },
+        {
+          "icon": "user",
+          "value": "Seul, de A à Z",
+          "label": "Conception, design & développement"
+        },
+        {
+          "icon": "gear",
+          "value": "Back-office sur mesure",
+          "label": "Galeries, onglets, tarifs et statistiques"
+        }
+      ],
+      "featured": true
+    },
+    {
+      "_id": "6ac6110e4eafba34a48a4e9c",
+      "slug": "candidature-qeeps",
+      "title": "Cette candidature",
+      "order": 3,
+      "tagline": "Landing page, charte graphique et back-office sur mesure",
+      "description": "La page que vous lisez : une candidature aux couleurs de Qeeps, dont les typographies, espacements et animations ont été relevés sur byqeeps.com, avec un back-office complet pour modifier chaque texte, projet et média sans toucher au code.",
+      "role": "Design, développement et déploiement",
+      "year": "2026",
+      "status": "En ligne",
+      "stack": [
+        "React",
+        "TypeScript",
+        "Node.js",
+        "Express",
+        "MongoDB"
+      ],
+      "highlights": [
+        "Faite pour Qeeps, au pixel près — typographies, espacements, ombres et animations relevés directement sur byqeeps.com",
+        "Chaque mot est modifiable — back-office complet : textes, projets, vidéos, couleurs et messages, sans toucher au code",
+        "Une vraie application full stack — React et TypeScript, API Express + MongoDB, authentification et responsive de bout en bout"
+      ],
+      "links": [],
+      "media": [
+        {
+          "type": "video",
+          "src": "/uploads/projets-candidature-qeeps/web/admin.mp4",
+          "poster": "/uploads/projets-candidature-qeeps/web/admin.jpg",
+          "caption": "Le back-office"
+        },
+        {
+          "type": "video",
+          "src": "/uploads/projets-candidature-qeeps/web/responsive.mp4",
+          "poster": "/uploads/projets-candidature-qeeps/web/responsive.jpg",
+          "caption": "Mobile & desktop"
+        }
+      ],
+      "featured": true,
+      "__v": 0,
+      "createdAt": "2026-10-07T09:29:50.544Z",
+      "updatedAt": "2026-10-08T11:38:00.048Z",
+      "badges": [
+        {
+          "icon": "gear",
+          "value": "Back-office complet",
+          "label": "Tout le contenu modifiable sans code"
+        },
+        {
+          "icon": "phone",
+          "value": "100 % responsive",
+          "label": "Mobile, tablette et desktop"
+        },
+        {
+          "icon": "palette",
+          "value": "Charte Qeeps",
+          "label": "Typos, espacements et animations relevés"
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "colors": {}
+  }
+}

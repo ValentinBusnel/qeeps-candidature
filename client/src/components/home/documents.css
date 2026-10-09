@@ -1,0 +1,372 @@
+/* ======================================================================
+   Bloc « Ma candidature » : cartes-documents + liseuse
+   Mêmes codes que les blocs Qeeps : bloc gris 828 × 310 (rayon 24), cartes
+   blanches à ombre longue, étiquettes arrondies, teintes de la palette.
+   ====================================================================== */
+
+/* le bloc : léger dégradé rose côté cartes (comme le turquoise du bloc formations) */
+.feature--docs {
+  overflow: visible;
+  background: linear-gradient(256deg, rgba(164, 71, 95, 0.1) 0%, var(--color-block) 58%);
+}
+.feature--docs .feature__text { width: 270px; }
+
+.docs { position: absolute; inset: 0; border-radius: inherit; }
+.docs__deck { position: absolute; left: 340px; top: 0; width: 488px; height: 310px; }
+
+/* --- une carte : une feuille A4 miniature (150 × 212) --- */
+.doc-card {
+  --spread: 128px;
+  --tilt: 7deg;
+  --lift: 0px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: calc(10 - var(--ak) * 2);
+  width: 150px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transform:
+    translate(calc(-50% + var(--k) * var(--spread)), calc(-50% + var(--ak) * 12px - var(--lift)))
+    rotate(calc(var(--k) * var(--tilt)));
+  transition: transform 0.6s var(--ease-out), opacity 0.4s ease;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+/* zone de survol stable : quand la carte se soulève, l'espace libéré dessous reste « survolé »
+   (sinon la souris en bas de carte la fait clignoter) */
+.doc-card::before { content: ""; position: absolute; inset: -6px -6px -34px; }
+.feature--docs:hover .doc-card { --spread: 140px; --tilt: 9deg; }
+.docs__deck:has(.doc-card:hover) .doc-card:not(:hover) { opacity: 0.88; }
+.doc-card:hover, .doc-card:focus-visible {
+  --lift: 18px;
+  z-index: 20;
+  transform: translate(calc(-50% + var(--k) * var(--spread)), calc(-50% - var(--lift))) rotate(0deg) scale(1.07);
+  outline: none;
+}
+
+/* flottement permanent, doux, décalé d'une carte à l'autre */
+.doc-card__float {
+  position: relative;
+  display: block;
+  animation: doc-float 6s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -1.7s);
+}
+@keyframes doc-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(0.6deg); }
+}
+
+.doc-card__sheet {
+  position: relative;
+  display: block;
+  width: 150px;
+  aspect-ratio: 1 / 1.4142;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(22, 73, 81, 0.06), 0 6px 14px rgba(22, 73, 81, 0.07), 0 28px 48px -12px rgba(22, 73, 81, 0.22);
+  transition: box-shadow 0.5s var(--ease-out);
+}
+.doc-card:hover .doc-card__sheet { box-shadow: 0 10px 20px rgba(22, 73, 81, 0.1), 0 40px 60px -14px rgba(22, 73, 81, 0.3); }
+
+/* halo de la couleur du document, sans contour net : la même respiration que le survol dans
+   l'aperçu de l'admin (va-et-vient + onde en boucle). Uniquement des transformations et de
+   l'opacité, calculées par la carte graphique : l'animation reste parfaitement fluide. */
+.doc-card__halo {
+  position: absolute; inset: -4px;
+  border-radius: 16px;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--doc-fg) 13%, transparent);
+  opacity: 0;
+  transform: scale(0.98);
+  transition: opacity 0.45s ease, transform 0.6s var(--ease-out);
+  will-change: transform, opacity;
+  z-index: -1;
+}
+.doc-card__halo::after {
+  content: ""; position: absolute; inset: 2px;
+  border-radius: 14px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--doc-fg) 32%, transparent);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.doc-card:hover .doc-card__halo, .doc-card:focus-visible .doc-card__halo {
+  opacity: 1;
+  transform: scale(1);
+  animation: doc-breathe 2.8s ease-in-out 0.45s infinite alternate;
+}
+.doc-card:hover .doc-card__halo::after, .doc-card:focus-visible .doc-card__halo::after { animation: doc-ripple 2.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s infinite; }
+@keyframes doc-breathe {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(1.045); opacity: 0.75; }
+}
+@keyframes doc-ripple {
+  from { transform: scale(1); opacity: 0.9; }
+  to { transform: scale(1.14); opacity: 0; }
+}
+
+/* voile coloré + bouton « Ouvrir » qui monte au survol */
+.doc-card__shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 45%, color-mix(in srgb, var(--doc-fg) 26%, transparent) 100%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.doc-card__open {
+  position: absolute; left: 50%; bottom: 12px;
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 12px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--color-primary);
+  font-size: 12px; font-weight: 600; white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(22, 73, 81, 0.18);
+  transform: translate(-50%, 14px);
+  opacity: 0;
+  transition: transform 0.45s var(--ease-out), opacity 0.3s ease;
+}
+.doc-card__open svg { width: 13px; height: 13px; }
+.doc-card:hover .doc-card__shade, .doc-card:focus-visible .doc-card__shade { opacity: 1; }
+.doc-card:hover .doc-card__open, .doc-card:focus-visible .doc-card__open { transform: translate(-50%, 0); opacity: 1; }
+
+/* étiquette posée sur le coin de la feuille */
+.doc-card__tag {
+  position: absolute; left: -8px; top: -10px;
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 26px; padding: 0 10px 0 8px;
+  border-radius: 8px;
+  background: var(--doc-bg);
+  color: var(--doc-fg);
+  font-size: 12px; font-weight: 600; white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(22, 73, 81, 0.12);
+  transform: rotate(-4deg);
+  transition: transform 0.5s var(--ease-out);
+}
+.doc-card__tag svg { width: 13px; height: 13px; }
+.doc-card:hover .doc-card__tag { transform: rotate(0deg) translateY(-2px); }
+
+/* --- miniatures --- */
+.doc-thumb { position: absolute; inset: 0; background: #fff; }
+.doc-thumb canvas { display: block; width: 100%; height: auto; opacity: 0; transition: opacity 0.6s ease; }
+.doc-thumb.is-ok canvas { opacity: 1; }
+.doc-thumb__scaler { width: 680px; transform-origin: 0 0; pointer-events: none; }
+.doc-thumb--letter .letter { min-height: 962px; }
+
+.doc-skeleton { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 9%; padding: 16% 14%; }
+.doc-skeleton i {
+  display: block; height: 3.2%; min-height: 4px; width: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #eef1f2 0%, #f7f8f8 40%, #eef1f2 80%);
+  background-size: 300% 100%;
+  animation: doc-shimmer 1.6s linear infinite;
+}
+@keyframes doc-shimmer { from { background-position: 100% 0; } to { background-position: -200% 0; } }
+
+/* ======================================================================
+   La lettre (feuille 680 px, réduite en miniature)
+   ====================================================================== */
+.letter {
+  position: relative;
+  padding: 64px 68px 72px;
+  background: #fff;
+  color: var(--color-primary);
+  font-family: var(--font-family);
+}
+.letter::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px;
+  background: linear-gradient(90deg, var(--doc-fg, #a4475f), color-mix(in srgb, var(--doc-fg, #a4475f) 30%, #fff));
+}
+.letter__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 56px; }
+.letter__brand { font-size: 26px; line-height: 1; font-weight: 600; letter-spacing: -0.02em; }
+.letter__brand span { color: var(--doc-fg, var(--color-primary-light)); }
+.letter__from { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; text-align: right; font-size: 13px; line-height: 1.35; color: var(--color-muted); }
+.letter__from b { font-size: 14px; font-weight: 600; color: var(--color-primary); }
+.letter__place { margin-bottom: 28px; font-size: 14px; color: var(--color-muted); }
+.letter__greeting { margin-bottom: 22px; font-size: 19px; line-height: 1.4; font-weight: 600; }
+.letter__p { margin-bottom: 18px; font-size: 15.5px; line-height: 1.75; color: var(--color-subtle); text-wrap: pretty; }
+.letter__end { margin-top: 34px; }
+.letter__closing { font-size: 15.5px; color: var(--color-subtle); }
+.letter__signature { position: relative; display: inline-block; margin-top: 10px; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; color: var(--color-primary); }
+.letter__signature svg { position: absolute; left: -4px; right: -10px; bottom: -10px; width: calc(100% + 14px); height: 12px; overflow: visible; }
+.letter__signature path { fill: none; stroke: var(--doc-fg, var(--color-primary-light)); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 0; }
+
+/* lettre « vivante » dans la liseuse : elle s'écrit paragraphe par paragraphe */
+.letter.is-live .lt-in { animation: lt-in 0.8s var(--ease-out) var(--d, 0s) backwards; }
+.letter.is-live .letter__signature path { stroke-dashoffset: 1; animation: lt-sign 1.1s cubic-bezier(0.6, 0, 0.3, 1) forwards; animation-delay: calc(var(--d, 0s) + 0.5s); }
+@keyframes lt-in { from { opacity: 0; transform: translateY(12px); filter: blur(5px); } }
+@keyframes lt-sign { to { stroke-dashoffset: 0; } }
+
+/* ======================================================================
+   La liseuse
+   ====================================================================== */
+.dv { position: fixed; inset: 0; z-index: 120; }
+.dv__backdrop {
+  position: absolute; inset: 0;
+  background: rgba(23, 67, 68, 0.38);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: dv-fade 0.5s ease both;
+}
+.dv.is-closing .dv__backdrop { animation: dv-fade-out 0.45s ease forwards; }
+@keyframes dv-fade { from { opacity: 0; } }
+@keyframes dv-fade-out { to { opacity: 0; } }
+
+/* barre du haut : onglets des documents + actions */
+.dv__bar {
+  position: absolute; z-index: 3; left: 50%; top: 16px;
+  display: flex; align-items: center; gap: 10px;
+  max-width: calc(100% - 24px);
+  padding: 6px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 1px 2px rgba(22, 73, 81, 0.08), 0 12px 32px rgba(22, 73, 81, 0.16);
+  transform: translateX(-50%);
+  animation: dv-bar 0.6s var(--ease-out) 0.18s backwards;
+}
+.dv.is-closing .dv__bar { animation: dv-bar-out 0.35s ease forwards; }
+@keyframes dv-bar { from { opacity: 0; transform: translate(-50%, -16px); } }
+@keyframes dv-bar-out { to { opacity: 0; transform: translate(-50%, -12px); } }
+.dv__tabs { display: flex; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.dv__tabs::-webkit-scrollbar { display: none; }
+.dv__tab {
+  display: inline-flex; align-items: center; gap: 8px; flex: none;
+  height: 36px; padding: 0 14px;
+  border: 0; border-radius: 11px;
+  background: transparent;
+  color: var(--color-subtle);
+  font: 500 14px var(--font-family);
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.dv__tab i { width: 8px; height: 8px; border-radius: 50%; background: var(--doc-fg); opacity: 0.45; transition: opacity 0.3s, transform 0.4s var(--ease-out); }
+.dv__tab:hover { color: var(--color-primary); }
+.dv__tab.is-active { background: var(--doc-bg); color: var(--doc-fg); font-weight: 600; }
+.dv__tab.is-active i { opacity: 1; transform: scale(1.25); }
+.dv__actions { display: flex; align-items: center; gap: 6px; padding-left: 6px; border-left: 1px solid var(--color-border); }
+.dv__download { height: 36px; }
+.dv__close {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border: 0; border-radius: 11px;
+  background: var(--color-block);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.3s var(--ease-out);
+}
+.dv__close:hover { background: var(--color-tile); transform: rotate(90deg); }
+.dv__close svg { width: 16px; height: 16px; }
+
+/* scène : la feuille au centre, défilement vertical */
+.dv__stage {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 92px 16px 40px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.dv__intro {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  margin-bottom: 22px;
+  text-align: center;
+  color: #fff;
+  animation: dv-intro 0.6s var(--ease-out) 0.25s backwards;
+  pointer-events: none;
+}
+.dv.is-closing .dv__intro { animation: dv-fade-out 0.25s ease forwards; }
+@keyframes dv-intro { from { opacity: 0; transform: translateY(10px); } }
+.dv__label {
+  height: 26px; padding: 0 11px;
+  display: inline-flex; align-items: center;
+  border-radius: 8px;
+  background: var(--doc-bg); color: var(--doc-fg);
+  font-size: 12.5px; font-weight: 600;
+}
+.dv__title { font-size: 28px; line-height: 1.2; font-weight: 600; letter-spacing: -0.01em; text-shadow: 0 2px 18px rgba(10, 40, 44, 0.35); }
+.dv__caption { font-size: 14px; font-weight: 500; opacity: 0.85; text-shadow: 0 1px 10px rgba(10, 40, 44, 0.35); }
+
+.dv__sheet {
+  position: relative;
+  flex: none;
+  max-width: 760px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(10, 40, 44, 0.08), 0 30px 80px rgba(10, 40, 44, 0.3);
+  transform-origin: 0 0;
+}
+.dv__sheet.is-next { animation: dv-in-next 0.6s var(--ease-out); }
+.dv__sheet.is-prev { animation: dv-in-prev 0.6s var(--ease-out); }
+@keyframes dv-in-next { from { opacity: 0; transform: translateX(70px) rotate(2deg); } }
+@keyframes dv-in-prev { from { opacity: 0; transform: translateX(-70px) rotate(-2deg); } }
+.dv.is-closing .dv__sheet { box-shadow: none; }
+
+/* pages PDF : séparées par un fin filet, chacune apparaît en se dévoilant */
+.dv-page { position: relative; aspect-ratio: 1 / 1.4142; background: #fff; }
+.dv-page.is-done { aspect-ratio: auto; }
+.dv-page + .dv-page { border-top: 1px solid var(--color-border); }
+.dv-page canvas { display: block; width: 100%; height: auto; }
+.dv-page.is-wait canvas { position: absolute; inset: 0; opacity: 0; }
+.dv-page.is-done canvas { animation: dv-page 0.7s var(--ease-out) both; }
+@keyframes dv-page { from { opacity: 0; filter: blur(8px); clip-path: inset(0 0 100% 0); } to { opacity: 1; filter: blur(0); clip-path: inset(0 0 0 0); } }
+
+.dv__sheet--letter .letter { min-height: min(1075px, 141.42vw); }
+
+.dv-error { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 80px 24px; text-align: center; color: var(--color-subtle); }
+
+/* pagination sous la feuille */
+.dv__pager {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  width: 100%; max-width: 760px;
+  margin-top: 18px;
+  color: #fff;
+  font-size: 13px; font-weight: 500;
+  animation: dv-intro 0.6s var(--ease-out) 0.4s backwards;
+}
+.dv.is-closing .dv__pager { animation: dv-fade-out 0.2s ease forwards; }
+.dv__pager button {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 36px; padding: 0 14px;
+  border: 0; border-radius: 11px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font: 500 13px var(--font-family);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background-color 0.2s;
+}
+.dv__pager button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.28); }
+.dv__pager button:disabled { opacity: 0; pointer-events: none; }
+.dv__pager button svg { width: 14px; height: 14px; }
+.dv__pager span { opacity: 0.8; }
+
+/* ---------- petits écrans ---------- */
+@media (max-width: 1199px) {
+  .feature--docs { background: var(--color-block); }
+  .feature--docs .feature__visual { --cx: 584px; --s: 0.8; margin-top: -10px; margin-bottom: calc(310px * (var(--s) - 1) - 4px); }
+  .feature--docs .doc-card, .feature--docs:hover .doc-card { --spread: 112px; --tilt: 7deg; }
+}
+@media (max-width: 640px) {
+  .dv__stage { padding: 78px 10px 28px; }
+  .dv__bar { top: 10px; gap: 6px; }
+  .dv__tab { padding: 0 10px; font-size: 13px; }
+  .dv__download span { display: none; }
+  .dv__title { font-size: 22px; }
+  .letter { padding: 36px 26px 44px; }
+  .letter__head { margin-bottom: 34px; }
+  .letter__p { font-size: 14.5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doc-card:hover .doc-card__halo, .doc-card:hover .doc-card__halo::after { animation: none; }
+  .doc-card__float, .doc-skeleton i, .dv__backdrop, .dv__bar, .dv__intro, .dv__sheet, .dv-page.is-done canvas, .letter.is-live .lt-in, .dv__pager { animation: none; }
+  .letter.is-live .letter__signature path { animation: none; stroke-dashoffset: 0; }
+}

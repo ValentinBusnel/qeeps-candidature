@@ -1,0 +1,214 @@
+/* ======================================================================
+   Expériences (ExperienceSwitcher)
+   Charte Qeeps : Poppins, #164951 / #176C79, blocs #F2F3F4 rayon 24, tuiles #E1E6E7.
+   ====================================================================== */
+.xps {
+  --dir: 1;
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 8px;
+  border-radius: var(--radius-block);
+  background: var(--color-block);
+  outline: none;
+}
+
+/* ---- Sélecteur : les postes côte à côte, pastille blanche « liquide » qu'on peut faire glisser ---- */
+.xps__timeline { display: flex; flex-direction: column; }
+.xps__rail {
+  position: relative;
+  height: 60px;
+  border-radius: 18px;
+  background: transparent;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+.xps__rail.is-dragging { cursor: grabbing; }
+.xps__ind {
+  position: absolute; top: 5px; bottom: 5px; z-index: 0;
+  margin: 0 3px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 0 1px rgba(22, 73, 81, 0.05);
+}
+.xps__seg {
+  position: absolute; top: 5px; bottom: 5px; z-index: 1;
+  display: flex; align-items: center; gap: 12px;
+  min-width: 0; padding: 0 18px 0 14px;
+  border: 0; border-radius: 13px;
+  background: transparent;
+  color: var(--color-muted);
+  font: 500 13px/1 var(--font-family); text-align: left;
+  cursor: inherit;
+  transition: color 0.35s ease;
+}
+.xps__seg:hover { color: var(--color-primary); }
+.xps__seg.is-active { color: var(--color-primary); }
+.xps__seg-logo {
+  flex: none; width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border-radius: 9px;
+  background: #e1e6e7; color: var(--color-primary);
+  font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
+  transition: background-color 0.35s ease, color 0.35s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.xps__seg.is-active .xps__seg-logo { background: var(--color-primary); color: #fff; transform: rotate(-6deg); }
+/* vrai logo : tuile blanche, logo en couleurs (grisé tant que le poste n'est pas affiché) */
+.xps__seg-logo.has-img, .xps__seg.is-active .xps__seg-logo.has-img { background: #fff; padding: 5px; box-shadow: 0 0 0 1px rgba(22, 73, 81, 0.07); }
+.xps__seg-logo img { width: 100%; height: 100%; object-fit: contain; filter: grayscale(1) opacity(0.55); transition: filter 0.4s ease; }
+.xps__seg.is-active .xps__seg-logo img, .xps__seg:hover .xps__seg-logo img { filter: none; }
+.xps__seg-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.xps__seg-text strong { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xps__seg-text small { font-size: 12px; font-weight: 500; color: var(--color-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xps__seg-num { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--color-muted); opacity: 0.55; font-variant-numeric: tabular-nums; }
+.xps__seg.is-active .xps__seg-num { color: var(--color-primary-light); opacity: 1; }
+.xps__hint { display: none; font-size: 12px; font-weight: 500; color: var(--color-muted); text-align: center; }
+
+/* ---- Fiche : une carte blanche posée dans le bloc gris ---- */
+.xps__card { display: contents; }
+.xps__sheet {
+  position: relative; overflow: hidden; isolation: isolate;
+  display: flex; flex-direction: column;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(22, 73, 81, 0.05), 0 20px 40px -28px rgba(22, 73, 81, 0.35);
+  perspective: 900px;
+}
+.xps__top {
+  display: flex; align-items: center; gap: 16px;
+  padding: 20px 26px;
+  border-bottom: 1px solid #edf0f1;
+}
+/* logo qui se retourne en 3D au changement de poste */
+.xps__logo {
+  flex: none; width: 52px; height: 52px;
+  display: grid; place-items: center;
+  border-radius: 15px;
+  background: linear-gradient(661deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: #fff; font-size: 17px; font-weight: 700; letter-spacing: 0.02em;
+  box-shadow: 0 12px 24px -12px rgba(22, 73, 81, 0.7);
+  transform: rotate(-6deg);
+  animation: xps-flip 0.9s cubic-bezier(0.34, 1.3, 0.64, 1) backwards;
+}
+@keyframes xps-flip {
+  from { transform: rotateY(calc(var(--dir) * -180deg)) rotate(-6deg) scale(0.8); opacity: 0.2; }
+  to { transform: rotate(-6deg); opacity: 1; }
+}
+.xps__logo.has-img {
+  padding: 9px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(22, 73, 81, 0.06), 0 12px 24px -14px rgba(22, 73, 81, 0.55);
+}
+.xps__logo img { width: 100%; height: 100%; object-fit: contain; }
+.xps__who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.xps__who h3 { font-size: 22px; line-height: 1.2; font-weight: 700; color: var(--color-primary); }
+.xps__who p { font-size: 14px; font-weight: 500; color: var(--color-muted); }
+.xps__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.xps__duration {
+  margin-left: auto; flex: none;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 5px;
+  min-width: 170px; padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(23, 108, 121, 0.06);
+  text-align: right;
+}
+.xps__bar { position: relative; width: 100%; height: 4px; margin-top: 4px; border-radius: 4px; background: rgba(23, 108, 121, 0.12); overflow: hidden; }
+.xps__bar span {
+  position: absolute; left: 0; top: 0; bottom: 0; width: var(--w); border-radius: inherit;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+  animation: xps-bar 1.1s 0.25s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+@keyframes xps-bar { from { width: 0; } }
+.xps__duration-value { font-size: 30px; line-height: 1; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.xps__duration-value small { font-size: 15px; font-weight: 600; letter-spacing: 0; }
+.xps__duration-label { font-size: 12px; font-weight: 500; color: var(--color-muted); }
+
+.xps__body { display: grid; grid-template-columns: minmax(0, 0.62fr) minmax(0, 1.6fr); }
+.xps__aside { display: flex; flex-direction: column; gap: 8px; padding: 18px 24px 22px; border-right: 1px solid #edf0f1; }
+.xps__label { font-size: 11.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-primary-light); }
+.xps__summary { margin-bottom: 10px; font-size: 14.5px; line-height: 1.55; font-weight: 500; color: var(--color-primary); }
+.xps__env { display: flex; flex-wrap: wrap; gap: 5px; }
+.xps__tech {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 27px; padding: 0 9px 0 7px;
+  border-radius: 8px; background: var(--color-block);
+  font-size: 11.5px; font-weight: 500; color: var(--color-primary);
+  transition: transform 0.35s var(--ease-out), background-color 0.3s ease;
+}
+.xps__tech img { width: 14px; height: 14px; object-fit: contain; }
+.xps__tech:hover { transform: translateY(-2px); background: #e1e6e7; }
+
+.xps__missions { display: flex; flex-direction: column; gap: 10px; padding: 16px 26px 18px; min-width: 0; }
+.xps__groups { position: relative; display: inline-flex; align-self: flex-start; gap: 4px; padding: 4px; border-radius: 13px; background: var(--color-block); }
+.xps__groups-ind {
+  position: absolute; left: 0; top: 4px; bottom: 4px;
+  border-radius: 9px; background: #fff;
+  box-shadow: 0 6px 14px -8px rgba(22, 73, 81, 0.4);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), width 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s;
+}
+.xps__group-tab {
+  height: 30px; padding: 0 13px;
+  border: 0; border-radius: 9px;
+  position: relative; z-index: 1;
+  background: transparent; color: var(--color-muted);
+  font: 500 12.5px/1 var(--font-family);
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+.xps__group-tab:hover { color: var(--color-primary); }
+.xps__group-tab.is-active { color: var(--color-primary); font-weight: 600; }
+.xps__bullets { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 24px; margin: 0; padding: 0; list-style: none; }
+.xps__bullets li {
+  display: flex; gap: 10px; align-items: flex-start;
+  margin: 0 -8px; padding: 6px 8px;
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+  font-size: 13px; line-height: 1.45; font-weight: 500; color: var(--color-primary);
+  animation: xps-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(0.12s + var(--k) * 0.045s);
+}
+.xps__bullets li:hover { background: rgba(23, 108, 121, 0.05); }
+.xps__bullets li:hover .xps__bullet-dot { transform: scale(1.12) rotate(-8deg); }
+.xps__bullet-dot {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  flex: none; width: 18px; height: 18px; margin-top: 1px;
+  display: grid; place-items: center;
+  border-radius: 6px; background: rgba(23, 108, 121, 0.1); color: var(--color-primary-light);
+}
+.xps__bullet-dot svg { width: 11px; height: 11px; stroke-width: 2.8; }
+
+/* ---- Entrée d'une fiche : cascade dans le sens de la navigation ---- */
+.xps__in { animation: xps-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: calc(0.1s + var(--k) * 0.06s); }
+@keyframes xps-in {
+  from { opacity: 0; transform: translateX(calc(var(--dir) * 24px)); filter: blur(5px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+.xps__tech { animation: xps-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; animation-delay: calc(0.35s + var(--i) * 0.03s); }
+@keyframes xps-pop { from { opacity: 0; transform: scale(0.5); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .xps__logo, .xps__in, .xps__tech, .xps__bullets li, .xps__bar span { animation: none; }
+  .xps__ind { transition: none !important; }
+}
+
+@media (max-width: 900px) {
+  .xps__body { grid-template-columns: 1fr; }
+  .xps__aside { border-right: 0; border-bottom: 1px solid #edf0f1; }
+  .xps__bullets { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .xps__rail { height: 60px; }
+  .xps__seg { gap: 8px; padding: 0 10px; }
+  .xps__seg-logo { width: 28px; height: 28px; font-size: 10px; }
+  .xps__seg-num { display: none; }
+  .xps__seg-text strong { font-size: 13px; }
+  .xps__seg-text small { font-size: 10.5px; }
+  .xps__top { flex-wrap: wrap; padding: 20px; gap: 12px; }
+  .xps__logo { width: 46px; height: 46px; font-size: 15px; }
+  .xps__who { flex: 1 1 0; }
+  .xps__who h3 { font-size: 19px; }
+  .xps__duration { margin-left: 0; width: 100%; min-width: 0; flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+  .xps__duration-value { font-size: 28px; }
+  .xps__aside, .xps__missions { padding: 18px 20px; }
+  .xps__groups { align-self: stretch; overflow-x: auto; scrollbar-width: none; }
+  .xps__group-tab { flex: none; }
+}

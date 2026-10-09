@@ -1,0 +1,238 @@
+/* ======================================================================
+   Vitrine projet compacte (ProjectStage) — tout tient sur un écran :
+   colonne d'infos à gauche, fenêtre de navigateur à droite.
+   Charte Qeeps : Poppins, #164951 / #176C79, tuiles #E1E6E7, blanc sur #F2F3F4.
+   ====================================================================== */
+.pstage {
+  display: grid;
+  grid-template-columns: minmax(0, 370px) minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+/* ---- Colonne d'infos ---- */
+.pstage__info {
+  display: flex; flex-direction: column; gap: 20px;
+  padding: 26px 18px 22px 22px;
+  min-width: 0;
+}
+.pstage__meta { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; color: var(--color-muted); }
+.pstage__status {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 26px; padding: 0 11px;
+  border-radius: 999px;
+  background: rgba(23, 108, 121, 0.1);
+  color: var(--color-primary-light);
+  font-size: 12.5px; font-weight: 600;
+}
+.pstage__pulse { position: relative; width: 6px; height: 6px; border-radius: 50%; background: var(--color-primary-light); }
+.pstage__pulse::after {
+  content: ""; position: absolute; inset: -4px; border-radius: 50%;
+  background: var(--color-primary-light);
+  animation: pstage-pulse 2s ease-out infinite;
+}
+@keyframes pstage-pulse { from { transform: scale(0.4); opacity: 0.45; } to { transform: scale(1.9); opacity: 0; } }
+.pstage__title { font-size: 34px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; color: var(--color-primary); }
+/* le dégradé est posé sur chaque lettre, pour qu'elles puissent s'animer séparément */
+.pstage__word { display: inline-block; white-space: nowrap; }
+.pstage__char {
+  display: inline-block;
+  background-image: linear-gradient(661deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  transform-origin: 50% 100%;
+}
+.pstage__w { display: inline-block; }
+.pstage__role { margin-top: 4px; font-size: 13px; font-weight: 500; color: var(--color-muted); }
+.pstage__desc { font-size: 14.5px; line-height: 1.55; font-weight: 500; color: var(--color-primary); opacity: 0.85; }
+
+/* chiffres clés : 3 cartes blanches sous la fenêtre */
+.pstage__keys { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.pstage__key {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 12px 10px 10px;
+  border-radius: 14px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(22, 73, 81, 0.04);
+  min-width: 0;
+  transition: transform 0.4s var(--ease-out), box-shadow 0.4s ease;
+}
+.pstage__key:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(22, 73, 81, 0.05), 0 12px 24px -16px rgba(22, 73, 81, 0.45); }
+.pstage__key-icon {
+  width: 34px; height: 34px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 10px; background: #e1e6e7;
+  color: var(--color-primary);
+}
+.pstage__key-icon svg { width: 16px; height: 16px; }
+.pstage__key-text { display: flex; flex-direction: column; min-width: 0; }
+.pstage__key-text strong { font-size: 13.5px; line-height: 1.3; font-weight: 600; color: var(--color-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pstage__key-text small { font-size: 11.5px; line-height: 1.35; font-weight: 500; color: var(--color-muted); }
+
+.pstage__foot { margin-top: auto; display: flex; flex-direction: column; gap: 16px; }
+.pstage__stack { display: flex; flex-wrap: wrap; gap: 6px; }
+.pstage__tech {
+  height: 32px; min-width: 32px; padding: 0 6px;
+  display: grid; place-items: center;
+  border-radius: 9px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(22, 73, 81, 0.05);
+  transition: transform 0.35s var(--ease-out), box-shadow 0.3s ease;
+}
+.pstage__tech:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(22, 73, 81, 0.06), 0 8px 16px -10px rgba(22, 73, 81, 0.4); }
+.pstage__tech img { width: 18px; height: 18px; object-fit: contain; }
+.pstage__tech-name { font-size: 11px; font-weight: 600; color: var(--color-primary); white-space: nowrap; }
+.pstage__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.pstage__actions svg { width: 15px; height: 15px; }
+
+/* ---- Fenêtre ---- */
+.pstage__visual { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.pstage__frame {
+  position: relative;
+  will-change: transform;
+  border-radius: 18px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(22, 73, 81, 0.05), 0 20px 40px -24px rgba(22, 73, 81, 0.35);
+}
+.pstage__bar {
+  position: relative;
+  display: flex; align-items: flex-end; gap: 14px;
+  height: 42px; padding: 0 12px 0 14px;
+  background: #f8f8f8;
+  border-bottom: 1px solid #e1e6e7;
+}
+.pstage__lights { display: flex; gap: 6px; align-self: center; flex: none; }
+.pstage__lights i { width: 10px; height: 10px; border-radius: 50%; background: #e1e6e7; }
+.pstage__lights i:first-child { background: #176c79; opacity: 0.35; }
+.pstage__url {
+  align-self: center; margin-left: auto; flex: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 24px; padding: 0 12px;
+  border-radius: 7px;
+  background: #f2f3f4;
+  font-size: 12px; font-weight: 500; color: var(--color-primary);
+  white-space: nowrap;
+}
+.pstage__url svg { width: 11px; height: 11px; color: var(--color-muted); }
+
+.pstage__screen { position: relative; aspect-ratio: 1920 / 1026; background: #f2f3f4; }
+/* changement de média : le nouveau se dévoile en volet par-dessus l'ancien, qui disparaît ensuite */
+.pstage__media {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: top center;
+  opacity: 0;
+  clip-path: inset(0 0 0 100%);
+  transform: scale(1.06);
+  transition: opacity 0s 0.95s, clip-path 0s 0.95s, transform 0s 0.95s;
+}
+.pstage__media.is-active {
+  z-index: 1;
+  opacity: 1;
+  clip-path: inset(0 0 0 0);
+  transform: none;
+  transition: clip-path 0.9s cubic-bezier(0.65, 0, 0.35, 1), transform 1.6s var(--ease-out);
+}
+.pstage__sheen {
+  position: absolute; inset: 0; z-index: 1;
+  pointer-events: none; overflow: hidden;
+}
+.pstage__sheen::after {
+  content: ""; position: absolute; top: -20%; bottom: -20%; width: 28%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+  transform: translateX(-120%) skewX(-16deg);
+  animation: pstage-sheen 1.3s 0.15s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@keyframes pstage-sheen { to { transform: translateX(480%) skewX(-16deg); } }
+/* reflet qui suit la souris sur la fenêtre (piloté par useTilt) */
+.pstage__glare {
+  position: absolute; inset: 0; z-index: 4;
+  border-radius: inherit; pointer-events: none;
+  background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.28), transparent 50%);
+  opacity: var(--glare-o, 0);
+  mix-blend-mode: soft-light;
+}
+.pstage__empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--color-muted); font-weight: 500; }
+.pstage__hit { position: absolute; inset: 0; z-index: 2; border: 0; background: transparent; cursor: zoom-in; }
+
+.pstage__controls {
+  position: absolute; z-index: 3; right: 14px; bottom: 14px;
+  display: flex; gap: 8px;
+  opacity: 0; transform: translateY(6px);
+  transition: opacity 0.3s ease, transform 0.4s var(--ease-out);
+}
+.pstage__frame:hover .pstage__controls, .pstage__controls:focus-within { opacity: 1; transform: none; }
+.pstage__ctrl {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border: 0; border-radius: 11px;
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  box-shadow: 0 6px 18px -8px rgba(22, 73, 81, 0.35);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: transform 0.25s var(--ease-out), background-color 0.2s;
+}
+.pstage__ctrl:hover { transform: scale(1.06); background: #fff; }
+.pstage__ctrl svg { width: 15px; height: 15px; stroke-width: 2.2; }
+
+/* ---- Chapitres = onglets du navigateur ---- */
+.pstage__tabs { display: flex; align-items: flex-end; gap: 2px; min-width: 0; height: 100%; }
+.pstage__chapter {
+  position: relative; min-width: 0; max-width: 230px;
+  display: flex; align-items: center; gap: 7px;
+  height: 34px; padding: 0 14px 2px;
+  border: 0; border-radius: 10px 10px 0 0;
+  background: transparent;
+  color: var(--color-muted);
+  font: 500 12.5px/1 var(--font-family);
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.pstage__chapter:hover { color: var(--color-primary); background: rgba(225, 230, 231, 0.55); }
+.pstage__chapter.is-active { background: #fff; color: var(--color-primary); font-weight: 600; margin-bottom: -1px; height: 35px; }
+/* petits arrondis inversés pour que l'onglet actif se fonde dans la page, comme dans Safari/Chrome */
+.pstage__chapter.is-active::before, .pstage__chapter.is-active::after {
+  content: ""; position: absolute; bottom: 0; width: 10px; height: 10px;
+  background: radial-gradient(circle at var(--cx) 0, transparent 9.5px, #fff 10px);
+}
+.pstage__chapter.is-active::before { left: -10px; --cx: 0; }
+.pstage__chapter.is-active::after { right: -10px; --cx: 10px; }
+.pstage__chapter svg { width: 11px; height: 11px; flex: none; }
+.pstage__chapter-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pstage__chapter-bar {
+  --p: 0;
+  position: absolute; left: 14px; right: 14px; bottom: 4px;
+  height: 2px; border-radius: 2px;
+  background: transparent; overflow: hidden;
+}
+.pstage__chapter.is-active .pstage__chapter-bar { background: #e1e6e7; }
+.pstage__chapter-bar::after {
+  content: ""; position: absolute; inset: 0;
+  transform-origin: left; transform: scaleX(var(--p));
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+  border-radius: inherit;
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.pstage__chapter.is-active .pstage__chapter-bar::after { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pstage__pulse::after { animation: none; }
+  .pstage__media, .pstage__media.is-active { transition: opacity 0.3s ease; transform: none; clip-path: none; }
+  .pstage__sheen { display: none; }
+}
+
+@media (max-width: 960px) {
+  .pstage { grid-template-columns: 1fr; }
+  .pstage__visual { order: -1; }
+  .pstage__info { padding: 10px 12px 14px; gap: 16px; }
+  .pstage__title { font-size: 30px; }
+  .pstage__controls { opacity: 1; transform: none; }
+}
+@media (max-width: 560px) {
+  .pstage__frame { border-radius: 14px; }
+  .pstage__bar { height: 36px; padding: 0 8px 0 12px; gap: 10px; }
+  .pstage__url { display: none; }
+  .pstage__chapter { height: 28px; padding: 0 10px 2px; font-size: 11.5px; }
+  .pstage__chapter.is-active { height: 29px; }
+  .pstage__keys { grid-template-columns: 1fr; gap: 8px; }
+  .pstage__actions .btn { flex: 1 1 auto; justify-content: center; }
+}

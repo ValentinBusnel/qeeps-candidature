@@ -1,0 +1,89 @@
+/* ======================================================================
+   Haut de page : capture du back-office (onglet « Mon site »), au gabarit réel
+   de l'admin (1440 × 916) puis réduite dans le cadre 876 × 557. Les touches
+   animées sont posées au pixel près par-dessus.
+   ====================================================================== */
+.mock.mock--admin { display: block; position: relative; }
+.amock {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1440px;
+  height: 916px;
+  transform: scale(0.608333);
+  transform-origin: 0 0;
+  background: #fff;
+  pointer-events: none;
+  user-select: none;
+  --tone: 23, 108, 121; /* cyan : la teinte de « Comment je travaille » */
+}
+.amock > * { position: absolute; }
+.amock-shot { top: 0; left: 0; width: 1440px; height: 916px; }
+
+/* point vert « Aperçu en direct » */
+.amock-pulse { border-radius: 50%; }
+.amock-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgb(110, 179, 130);
+  animation: amock-ping 2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+@keyframes amock-ping { from { transform: scale(1); opacity: 0.7; } to { transform: scale(3); opacity: 0; } }
+
+/* champ en cours de modification */
+.amock-type {
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  border-radius: 9px;
+  background: #fff;
+  font-family: var(--font-family);
+  font-size: 14px;
+  line-height: 20px;
+  color: rgb(22, 73, 81);
+  white-space: pre;
+}
+.amock-caret { display: inline-block; width: 1.5px; height: 18px; margin-left: 1px; background: rgb(22, 73, 81); animation: amock-blink 1.1s steps(1) infinite; }
+.amock-caret.is-typing { animation: none; }
+@keyframes amock-blink { 50% { opacity: 0; } }
+
+/* titre du bloc dans sa ligne repliable */
+.amock-item-name {
+  background: #fff;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 21px;
+  color: rgb(22, 73, 81);
+  white-space: pre;
+}
+
+/* même titre dans le bloc de l'aperçu (h3 600 24px, réduit de 0.39375) */
+.amock-pv-text {
+  background: rgb(242, 243, 244);
+  font-family: var(--font-family);
+  font-size: 9.45px;
+  font-weight: 600;
+  line-height: 11.34px;
+  color: rgb(22, 73, 81);
+  white-space: pre;
+}
+
+/* fiche de l'aperçu : halo doux en continu (couleur de la section) */
+.amock-halo { border-radius: 9.45px; animation: amock-breathe 2.8s ease-in-out infinite alternate; }
+@keyframes amock-breathe {
+  from { box-shadow: 0 0 0 1.5px rgba(var(--tone), 0.32), 0 0 0 3px rgba(var(--tone), 0.07); }
+  to { box-shadow: 0 0 0 1.5px rgba(var(--tone), 0.22), 0 0 0 8px rgba(var(--tone), 0.06); }
+}
+/* onde à chaque mise à jour (la même que dans l'aperçu de l'admin) */
+.amock-wave { border-radius: 9.45px; animation: amock-wave 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+@keyframes amock-wave {
+  0% { box-shadow: 0 0 0 0 rgba(var(--tone), 0.45); background: rgba(var(--tone), 0.06); }
+  100% { box-shadow: 0 0 0 26px rgba(var(--tone), 0); background: rgba(var(--tone), 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .amock-pulse::after, .amock-caret, .amock-halo, .amock-wave { animation: none; }
+}

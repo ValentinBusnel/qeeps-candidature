@@ -1,0 +1,293 @@
+/* ---------- Logo texte (même gabarit que le logo Qeeps : 85 × 27 px) ---------- */
+.wordmark {
+  font-size: 26px;
+  line-height: 27px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-primary);
+}
+.wordmark__dot { color: var(--color-primary-light); }
+.wordmark--light { color: #fff; font-size: 44px; line-height: 48px; }
+.wordmark--light .wordmark__dot { color: #fff; }
+
+/* ---------- Navigation : 80 px, fond #F8F8F8, marges 20/20/20/50 ---------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--nav-h);
+  background: var(--color-nav);
+}
+.nav__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 20px 20px 20px 50px;
+  gap: 16px;
+}
+.nav__left { display: flex; align-items: center; gap: 64px; }
+.nav__left > a { text-decoration: none; width: 85px; white-space: nowrap; } /* même emprise que le logo Qeeps : les liens démarrent à 199 px */
+.nav__links { display: flex; align-items: center; gap: 10px; }
+.nav__link {
+  font-size: 15px;
+  line-height: 30px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--color-primary);
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+.nav__link:hover, .nav__link.is-active { text-decoration: underline; }
+.nav__right { display: flex; align-items: center; gap: 16px; }
+.nav__brand-btn.is-current { box-shadow: inset 0 0 0 1px var(--color-primary); }
+
+.nav__burger { display: none; }
+
+/* ≤ 1199 px : comme byqeeps.com, barre de 64 px (logo + « burger ») ; le menu se déroule
+   par-dessus la page en un panneau gris arrondi : liens sur une ligne, puis les deux boutons
+   côte à côte (panneau de 197 px, rayon 16, ombre douce) */
+@media (max-width: 1199px) {
+  .nav { height: 64px; background: transparent; }
+  .nav::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 64px;
+    background: var(--color-nav);
+    border-radius: 0;
+    transition: height 0.45s cubic-bezier(0.44, 0, 0.56, 1), border-radius 0.45s cubic-bezier(0.44, 0, 0.56, 1), box-shadow 0.45s ease;
+  }
+  .nav--open::before {
+    height: 197px;
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 12px 30px rgba(22, 73, 81, 0.08), 0 2px 6px rgba(22, 73, 81, 0.04);
+  }
+  .nav__inner { position: relative; height: 64px; padding: 0 10px 0 20px; }
+  .nav__left { gap: 0; }
+  .nav__links, .nav__right {
+    position: absolute; left: 20px; right: 20px;
+    opacity: 0; visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.44, 0, 0.56, 1), visibility 0s 0.3s;
+  }
+  .nav__links { top: 64px; height: 56px; gap: 15px; }
+  .nav__right { top: 136px; gap: 16px; }
+  .nav__right .btn { flex: 1; min-width: 0; }
+  .nav--open .nav__links, .nav--open .nav__right {
+    opacity: 1; visibility: visible; transform: none;
+    transition: opacity 0.35s 0.12s ease, transform 0.45s 0.08s cubic-bezier(0.44, 0, 0.56, 1), visibility 0s;
+  }
+  .nav--open .nav__right { transition-delay: 0.18s, 0.14s, 0s; }
+  .nav__burger {
+    position: relative;
+    display: block;
+    width: 44px; height: 44px;
+    padding: 0; border: 0;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* pas de cadre au clic (Qeeps n'en a pas) ; au clavier, les traits passent en pétrole */
+  .nav__burger:focus-visible { outline: none; }
+  .nav__burger:focus-visible i { background: var(--color-primary); }
+  .nav__burger i {
+    position: absolute; left: 12px;
+    width: 20px; height: 2px;
+    border-radius: 10px;
+    background: #999;
+    transition: transform 0.35s cubic-bezier(0.44, 0, 0.56, 1), top 0.35s cubic-bezier(0.44, 0, 0.56, 1);
+  }
+  .nav__burger i:first-child { top: 16px; }
+  .nav__burger i:last-child { top: 27px; }
+  .nav--open .nav__burger i:first-child { top: 21px; transform: rotate(45deg); }
+  .nav--open .nav__burger i:last-child { top: 21px; transform: rotate(-45deg); }
+}
+
+/* ---------- Footer : fond pétrole, 64 px de marge, contenu sur 1000 px ---------- */
+.footer {
+  background: var(--color-deep);
+  color: #fff;
+  padding: 64px;
+}
+.footer__inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 223px;
+  gap: 48px;
+}
+.footer__brand { display: flex; flex-direction: column; gap: 10px; padding-top: 6px; }
+.footer__brand p { max-width: 376px; font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: -0.5px; color: rgba(255, 255, 255, 0.6); }
+.footer__socials { display: flex; gap: 10px; }
+.footer__socials a {
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  color: rgba(255, 255, 255, 0.85);
+  transition: opacity 0.2s ease;
+}
+.footer__socials a:hover { opacity: 0.7; }
+.footer__socials svg { width: 22px; height: 22px; }
+.footer__cols { display: flex; flex-direction: column; gap: 32px; padding-top: 36px; }
+.footer__col { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.footer__title { font-size: 24px; line-height: 1.2; font-weight: 600; margin-bottom: -2px; color: #fff; }
+.footer__col a, .footer__col button {
+  font: 500 16px/1.2 var(--font-family);
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.footer__col a:hover, .footer__col button:hover { color: #fff; }
+.footer__legal {
+  max-width: 1000px;
+  margin: 24px auto 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  color: rgba(255, 255, 255, 0.6);
+}
+/* ≤ 1199 px : une colonne, 64 px de marge partout (byqeeps.com) */
+@media (max-width: 1199px) {
+  .footer { padding: 64px; }
+  .footer__inner { grid-template-columns: 1fr; gap: 48px; }
+  .footer__brand, .footer__cols { padding-top: 0; }
+}
+@media (max-width: 809px) {
+  .footer { padding: 64px; }
+}
+
+/* ---------- Modale de contact ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(23, 67, 68, 0.35);
+  backdrop-filter: blur(6px);
+  animation: fade-in 0.25s ease;
+}
+.modal__panel {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  background: var(--color-bg);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: pop-in 0.45s var(--ease-out);
+}
+.modal__close {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  cursor: pointer;
+}
+.modal__close svg { width: 16px; height: 16px; }
+.modal__direct { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 16px; }
+.modal__direct .tag { text-decoration: none; height: 28px; }
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes pop-in { from { opacity: 0; transform: translateY(24px) scale(0.98); filter: blur(6px); } }
+
+.contact-form { display: flex; flex-direction: column; gap: 16px; }
+.contact-form__row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.contact-form__error { color: var(--color-danger); font-size: 14px; line-height: 20px; }
+.contact-done { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 0; }
+@media (max-width: 560px) {
+  .contact-form__row { grid-template-columns: 1fr; }
+  .modal__panel { padding: 24px 20px; }
+}
+
+/* ---------- Modales « À propos » et connexion ---------- */
+.modal__panel--about, .modal__panel--login { max-width: 500px; gap: 0; }
+.site-modal__icon {
+  width: 44px; height: 44px; margin-bottom: 16px;
+  display: grid; place-items: center;
+  border-radius: 13px;
+  background: #e1e6e7; color: var(--color-primary);
+  transform: rotate(-6deg);
+  animation: site-icon 0.7s 0.1s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+.site-modal__icon svg { width: 21px; height: 21px; }
+@keyframes site-icon { from { transform: rotate(-30deg) scale(0.5); opacity: 0; } }
+.site-about { display: flex; flex-direction: column; gap: 10px; }
+.site-about .t-overline { font-size: 14px; }
+.site-about h2 { margin-bottom: 4px; }
+.site-about .t-body { color: var(--color-subtle, var(--color-muted)); }
+.site-about__points { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 0; padding: 16px; border-radius: 16px; background: var(--color-block); list-style: none; }
+.site-about__points li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.5; font-weight: 500; color: var(--color-primary); }
+.site-about__points svg { flex: none; width: 16px; height: 16px; margin-top: 2px; color: var(--color-primary-light); }
+.site-about__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.site-login { display: flex; flex-direction: column; gap: 16px; }
+.site-login .btn { justify-content: center; }
+
+/* ======================================================================
+   Aperçu de l'admin (iframe /?apercu=1). Les halos sont dans un calque à part ;
+   --ps compense la réduction de l'aperçu, --pf-* est la couleur de la section.
+   ====================================================================== */
+html.is-preview { --ps: 2; --pf-fg: #176c79; --pf-bg: #ddf7f7; scroll-behavior: auto; } /* le défilement doux est animé en JS */
+html.is-preview [data-edit], html.is-preview [data-edit] * { cursor: pointer !important; }
+/* survol : la même onde que la mise en lumière, qui va et vient avec un léger rebond
+   tant que la souris reste sur la partie, dans la couleur de cette partie */
+.pv-hover {
+  position: absolute;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0;
+  background: color-mix(in srgb, var(--hv-bg, var(--pf-bg)) 16%, transparent);
+  transition:
+    opacity 0.3s ease,
+    top 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 0.35s ease;
+}
+.pv-hover.is-on { opacity: 1; animation: pv-breathe 2.8s ease-in-out infinite alternate; }
+/* une onde douce qui part du bord et s'efface, en continu */
+.pv-hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+}
+.pv-hover.is-on::after { animation: pv-ripple 2.8s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+@keyframes pv-breathe {
+  from { box-shadow: 0 0 0 calc(1.5px * var(--ps)) color-mix(in srgb, var(--hv-fg) 34%, transparent), 0 0 0 calc(3px * var(--ps)) color-mix(in srgb, var(--hv-fg) 8%, transparent); }
+  to { box-shadow: 0 0 0 calc(1.5px * var(--ps)) color-mix(in srgb, var(--hv-fg) 24%, transparent), 0 0 0 calc(7px * var(--ps)) color-mix(in srgb, var(--hv-fg) 7%, transparent); }
+}
+@keyframes pv-ripple {
+  0% { opacity: 1; box-shadow: 0 0 0 0 color-mix(in srgb, var(--hv-fg) 22%, transparent); }
+  100% { opacity: 1; box-shadow: 0 0 0 calc(18px * var(--ps)) color-mix(in srgb, var(--hv-fg) 0%, transparent); }
+}
+/* mise en lumière : la même onde que « Voir cette expérience », dans la couleur de la section */
+.pv-spot {
+  position: absolute;
+  z-index: 9999;
+  pointer-events: none;
+  animation: pv-spot 2.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes pv-spot {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--pf-fg) 35%, transparent); }
+  25% { box-shadow: 0 0 0 calc(10px * var(--ps)) color-mix(in srgb, var(--pf-fg) 12%, transparent); }
+  100% { box-shadow: 0 0 0 calc(22px * var(--ps)) color-mix(in srgb, var(--pf-fg) 0%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) { .pv-spot { animation-duration: 0.01s; } .pv-hover { transition: opacity 0.2s ease; } .pv-hover.is-on, .pv-hover.is-on::after { animation: none; } .pv-hover.is-on { box-shadow: 0 0 0 calc(1.5px * var(--ps)) color-mix(in srgb, var(--hv-fg) 40%, transparent); } }

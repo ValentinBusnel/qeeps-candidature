@@ -1,0 +1,25 @@
+{
+  "name": "qeeps-candidature",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Landing page de candidature pour Qeeps — React/TypeScript + Node/Express + MongoDB",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w server && npm run build -w client",
+    "seed": "npm run seed -w server",
+    "db:up": "docker compose up -d mongo",
+    "db:down": "docker compose down",
+    "start": "npm run start -w server",
+    "content:export": "npm run content:export -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

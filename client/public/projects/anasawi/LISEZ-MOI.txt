@@ -1,0 +1,1 @@
+Dépose ici : accueil.png, ecran-2.png, mobile.png, demo.mp4 (noms modifiables dans server/src/data/seed-data.ts)
