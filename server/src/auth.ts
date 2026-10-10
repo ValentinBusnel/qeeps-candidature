@@ -107,13 +107,13 @@ export function resetLoginFailures(ip: string) {
 }
 
 /* ---------- Middlewares ---------- */
-export type AuthedRequest = Request & { userId?: string };
+export type AuthedRequest = Request & { userId?: string; userRole?: "admin" | "viewer" };
 
 /**
  * Protège les routes admin. La vérification de la version de session
  * se fait dans `loadUser` (passé par app.ts) pour éviter une dépendance circulaire.
  */
-export function requireAuth(loadUser: (id: string) => Promise<{ sessionVersion: number } | null>) {
+export function requireAuth(loadUser: (id: string) => Promise<{ sessionVersion: number; role?: "admin" | "viewer"; passwordHash?: string } | null>) {
   return async (req: AuthedRequest, res: Response, next: NextFunction) => {
     // En-tête exigé sur les requêtes qui modifient : bloque les formulaires cross-site (CSRF)
     if (req.method !== "GET" && req.get("X-Requested-With") !== "admin") {
@@ -122,8 +122,15 @@ export function requireAuth(loadUser: (id: string) => Promise<{ sessionVersion: 
     const payload = readToken(getCookie(req));
     if (!payload) return res.status(401).json({ error: "Non connecté" });
     const user = await loadUser(payload.sub);
-    if (!user || user.sessionVersion !== payload.ver) return res.status(401).json({ error: "Session expirée" });
+    if (!user || !user.passwordHash || user.sessionVersion !== payload.ver) return res.status(401).json({ error: "Session expirée" });
     req.userId = payload.sub;
+    req.userRole = user.role ?? "admin"; // les comptes créés avant les rôles sont administrateurs
     next();
   };
+}
+
+/** Les comptes « lecture seule » consultent tout mais ne modifient rien. */
+export function requireAdmin(req: AuthedRequest, res: Response, next: NextFunction) {
+  if (req.userRole === "admin") return next();
+  res.status(403).json({ error: "Votre accès est en lecture seule" });
 }

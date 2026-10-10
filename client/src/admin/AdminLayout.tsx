@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { adminApi } from "../api";
 import { Icon } from "../components/Icons";
@@ -76,7 +76,7 @@ export function SiteLink({ className, children, role }: { className?: string; ch
 }
 
 function AccountMenu() {
-  const { email, logout } = useAuth();
+  const { email, logout, readOnly } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -104,7 +104,13 @@ function AccountMenu() {
         <p className="adm-account__who">
           <small>Connecté en tant que</small>
           {email}
+          <small className="adm-account__role">{readOnly ? "Lecture seule" : "Administrateur"}</small>
         </p>
+        {!readOnly && (
+          <Link to="/admin/utilisateurs" role="menuitem">
+            <Icon name="users" /> Utilisateurs
+          </Link>
+        )}
         <Link to="/admin/apparence" role="menuitem">
           <Icon name="palette" /> Couleurs du site
         </Link>
@@ -159,8 +165,33 @@ function Spaces({ unread }: { unread: number }) {
   );
 }
 
+/** Boutons qui ne modifient rien (navigation, ouverture, aperçu) : restent actifs en lecture seule. */
+const RO_ALLOWED =
+  ".adm-msg, .adm-reader__back, .adm-row, .adm-file, .adm-item__toggle, .adm-plist__main, .adm-sec-nav__btn, .adm-preview-toggle, .adm-preview__devices button, [data-ro-allow] *";
+
+/**
+ * Lecture seule : tous les champs et boutons d'action de la page sont désactivés,
+ * y compris ceux qui apparaissent ensuite (le serveur refuse de toute façon les modifications).
+ */
+function useReadOnly(root: RefObject<HTMLElement | null>, on: boolean) {
+  useEffect(() => {
+    const el = root.current;
+    if (!on || !el) return;
+    const lock = () => {
+      el.querySelectorAll<HTMLInputElement | HTMLButtonElement>("input, textarea, select, button").forEach((c) => {
+        if (!c.disabled && !c.matches(RO_ALLOWED)) c.disabled = true;
+      });
+    };
+    lock();
+    const obs = new MutationObserver(lock);
+    obs.observe(el, { subtree: true, childList: true, attributes: true, attributeFilter: ["disabled"] });
+    return () => obs.disconnect();
+  }, [root, on]);
+}
+
 export default function AdminLayout() {
   const { pathname } = useLocation();
+  const { readOnly } = useAuth();
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
@@ -171,6 +202,7 @@ export default function AdminLayout() {
   useEffect(() => {
     mainRef.current?.scrollTo({ top: 0 });
   }, [pathname]);
+  useReadOnly(mainRef, readOnly);
 
   // l'éditeur de contenu prend toute la largeur (aperçu en direct à droite)
   const wide = pathname.startsWith("/admin/contenu");
@@ -180,7 +212,7 @@ export default function AdminLayout() {
   return (
     <ProfileDraftProvider>
       <div
-        className={`adm ${wide ? "adm--wide" : ""} ${fit ? "adm--fit" : ""}`}
+        className={`adm ${wide ? "adm--wide" : ""} ${fit ? "adm--fit" : ""} ${readOnly ? "adm--readonly" : ""}`}
         onMouseDown={(e) => {
           // un clic n'importe où dans une fiche place le curseur dans son champ
           const t = e.target as HTMLElement;
@@ -198,6 +230,11 @@ export default function AdminLayout() {
           </Link>
           <Spaces unread={unread} />
           <div className="adm-top__right">
+            {readOnly && (
+              <span className="adm-ro-badge" title="Vous pouvez tout consulter, mais rien modifier">
+                <Icon name="eye" /> <span>Lecture seule</span>
+              </span>
+            )}
             <SiteLink className="btn btn--secondary btn--sm adm-top__site">
               <Icon name="eye" /> Voir le site
             </SiteLink>
@@ -209,7 +246,7 @@ export default function AdminLayout() {
             <Outlet />
           </div>
         </main>
-        <PublishBar />
+        {!readOnly && <PublishBar />}
       </div>
     </ProfileDraftProvider>
   );

@@ -35,6 +35,26 @@ médiathèque, couleurs et compte.
 - Sécurité : mots de passe hachés (scrypt), session signée dans un cookie httpOnly,
   protection CSRF, 5 tentatives de connexion max par quart d'heure.
 
+### Utilisateurs et rôles
+
+Depuis l'admin (menu du compte → **Utilisateurs**), un administrateur invite quelqu'un par son email avec l'un de ces rôles :
+
+- **Administrateur** : peut tout modifier et gérer les accès ;
+- **Lecture seule** : consulte tout l'admin, mais rien ne peut être modifié (le serveur refuse toute modification).
+
+La personne invitée reçoit un lien (valable 7 jours, à usage unique) pour choisir son mot de passe. Le même bouton envoie un lien de nouveau mot de passe à un compte existant.
+
+Envoi des emails (facultatif) : Railway bloque le SMTP, on passe donc par une API HTTP.
+
+| Variable | Rôle |
+| --- | --- |
+| `BREVO_API_KEY` | clé API Brevo (offre gratuite ; l'expéditeur peut être une adresse vérifiée, ex. Gmail) |
+| `RESEND_API_KEY` | ou clé API Resend (nécessite un domaine vérifié) |
+| `MAIL_FROM` | adresse d'expédition (vérifiée chez le service choisi) |
+| `MAIL_FROM_NAME` | nom affiché, par défaut « Valentin Busnel » |
+
+Sans ces variables, l'admin affiche le lien d'invitation à copier et transmettre soi-même.
+
 ## API
 
 | Méthode | Route | Rôle |

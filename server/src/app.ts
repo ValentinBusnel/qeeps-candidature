@@ -12,6 +12,7 @@ import {
   loginAllowed,
   readToken,
   recordLoginFailure,
+  requireAdmin,
   requireAuth,
   resetLoginFailures,
   setSessionCookie,
@@ -21,6 +22,8 @@ import {
 import { ALLOWED_TYPES, MAX_UPLOAD_BYTES, UPLOAD_DIR, deleteUpload, listUploads, saveUpload } from "./uploads.js";
 import { runSeed } from "./seed.js";
 import { checkSetupKey, consumeSetupKey } from "./setup.js";
+import { inviteMail, mailConfigured, sendMail, siteBase } from "./mail.js";
+import crypto from "node:crypto";
 import path from "node:path";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -83,6 +86,40 @@ const settingsSchema = z.object({
   colors: z.record(z.string().regex(/^--[a-z0-9-]+$/), z.string().regex(/^#[0-9a-fA-F]{6}$/))
 });
 
+/* ---------- Invitations ---------- */
+const INVITE_DAYS = 7;
+const sha256 = (t: string) => crypto.createHash("sha256").update(t).digest("hex");
+
+/** Nouveau jeton d'invitation : seul son empreinte est gardée en base, le lien n'existe qu'une fois. */
+function newInvite() {
+  const token = crypto.randomBytes(32).toString("base64url");
+  return {
+    token,
+    link: `${siteBase()}/admin/connexion?invitation=${token}`,
+    fields: { inviteTokenHash: sha256(token), inviteExpires: new Date(Date.now() + INVITE_DAYS * 86_400_000) }
+  };
+}
+
+async function findInvite(token: string) {
+  if (!token || token.length > 100) return null;
+  const user = await User.findOne({ inviteTokenHash: sha256(token) });
+  return user && user.inviteExpires && user.inviteExpires.getTime() > Date.now() ? user : null;
+}
+
+type UserLike = { _id: unknown; email: string; role?: string; passwordHash?: string; inviteExpires?: Date; createdAt?: Date };
+const publicUser = (u: UserLike, meId?: string) => ({
+  _id: String(u._id),
+  email: u.email,
+  role: u.role ?? "admin",
+  status: u.passwordHash ? "active" : "pending",
+  inviteExpires: u.inviteExpires,
+  createdAt: u.createdAt,
+  me: String(u._id) === meId
+});
+
+/** Garde-fou : il reste toujours au moins un administrateur qui a choisi son mot de passe. */
+const otherActiveAdmins = (id: string) => User.countDocuments({ _id: { $ne: id }, role: { $ne: "viewer" }, passwordHash: { $nin: ["", null] } });
+
 export function createApp(clientOrigin: string) {
   const app = express();
   app.disable("x-powered-by");
@@ -99,6 +136,7 @@ export function createApp(clientOrigin: string) {
     "/api/admin/uploads",
     needDb,
     auth,
+    requireAdmin,
     express.raw({ type: Object.keys(ALLOWED_TYPES), limit: MAX_UPLOAD_BYTES }),
     h(async (req, res) => {
       const mime = (req.get("Content-Type") ?? "").split(";")[0];
@@ -172,13 +210,13 @@ export function createApp(clientOrigin: string) {
       const email = String(req.body?.email ?? "").trim().toLowerCase();
       const password = String(req.body?.password ?? "");
       const user = await User.findOne({ email });
-      if (!user || !verifyPassword(password, user.passwordHash)) {
+      if (!user || !user.passwordHash || !verifyPassword(password, user.passwordHash)) {
         recordLoginFailure(ip);
         return res.status(401).json({ error: "Email ou mot de passe incorrect" });
       }
       resetLoginFailures(ip);
       setSessionCookie(res, createToken({ sub: user.id, ver: user.sessionVersion }));
-      res.json({ email: user.email });
+      res.json({ email: user.email, role: user.role ?? "admin" });
     })
   );
 
@@ -214,12 +252,49 @@ export function createApp(clientOrigin: string) {
         recordLoginFailure(ip);
         return res.status(403).json({ error: "Clé de première connexion invalide : ouvre le lien affiché dans les journaux du serveur." });
       }
-      const user = await User.create({ email: body.data.email, passwordHash: hashPassword(body.data.password) });
+      const user = await User.create({ email: body.data.email, passwordHash: hashPassword(body.data.password), role: "admin" });
       consumeSetupKey();
       resetLoginFailures(ip);
       console.log(`🔐 Compte admin créé depuis le site pour ${user.email}`);
       setSessionCookie(res, createToken({ sub: user.id, ver: user.sessionVersion }));
-      res.status(201).json({ email: user.email });
+      res.status(201).json({ email: user.email, role: user.role });
+    })
+  );
+
+  // Invitation : la personne invitée choisit son mot de passe depuis le lien reçu
+  app.get(
+    "/api/auth/invite",
+    needDb,
+    h(async (req, res) => {
+      const user = await findInvite(String(req.query.token ?? ""));
+      res.json(user ? { valid: true, email: user.email, role: user.role ?? "admin", reset: Boolean(user.passwordHash) } : { valid: false });
+    })
+  );
+  app.post(
+    "/api/auth/invite",
+    needDb,
+    h(async (req, res) => {
+      if (req.get("X-Requested-With") !== "admin") return res.status(403).json({ error: "Requête refusée" });
+      const ip = req.ip ?? "unknown";
+      if (!loginAllowed(ip)) return res.status(429).json({ error: "Trop de tentatives, réessaie dans 15 minutes" });
+      const body = z
+        .object({ token: z.string().min(1), password: z.string().min(10, "Le mot de passe doit faire au moins 10 caractères").max(200) })
+        .safeParse(req.body);
+      if (!body.success) return res.status(400).json({ error: body.error.issues[0]?.message ?? "Champs invalides" });
+      const user = await findInvite(body.data.token);
+      if (!user) {
+        recordLoginFailure(ip);
+        return res.status(410).json({ error: "Ce lien n'est plus valable. Demandez-en un nouveau à l'administrateur." });
+      }
+      user.passwordHash = hashPassword(body.data.password);
+      user.inviteTokenHash = undefined;
+      user.inviteExpires = undefined;
+      user.sessionVersion += 1; // un ancien mot de passe éventuel ne donne plus accès
+      await user.save();
+      resetLoginFailures(ip);
+      console.log(`🔐 Mot de passe choisi par ${user.email}`);
+      setSessionCookie(res, createToken({ sub: user.id, ver: user.sessionVersion }));
+      res.json({ email: user.email, role: user.role ?? "admin" });
     })
   );
 
@@ -234,14 +309,18 @@ export function createApp(clientOrigin: string) {
       const payload = readToken(getCookie(req));
       if (!payload || !isDbConnected()) return res.status(401).json({ error: "Non connecté" });
       const user = await User.findById(payload.sub).lean();
-      if (!user || user.sessionVersion !== payload.ver) return res.status(401).json({ error: "Non connecté" });
-      res.json({ email: user.email });
+      if (!user || !user.passwordHash || user.sessionVersion !== payload.ver) return res.status(401).json({ error: "Non connecté" });
+      res.json({ email: user.email, role: user.role ?? "admin" });
     })
   );
 
   /* ======================= Admin (protégé) ======================= */
   const admin = express.Router();
   admin.use(needDb, auth);
+  // lecture seule : toutes les modifications sont refusées, sauf ses propres identifiants
+  admin.use((req: AuthedRequest, res, next) =>
+    req.method === "GET" || (req.method === "PUT" && req.path === "/account") ? next() : requireAdmin(req, res, next)
+  );
 
   admin.get(
     "/overview",
@@ -379,6 +458,9 @@ export function createApp(clientOrigin: string) {
       if (!user || !verifyPassword(body.data.currentPassword, user.passwordHash)) {
         return res.status(401).json({ error: "Mot de passe actuel incorrect" });
       }
+      if (body.data.email && (await User.exists({ email: body.data.email.toLowerCase(), _id: { $ne: user._id } }))) {
+        return res.status(409).json({ error: "Cet email est déjà utilisé" });
+      }
       if (body.data.email) user.email = body.data.email.toLowerCase();
       if (body.data.newPassword) {
         user.passwordHash = hashPassword(body.data.newPassword);
@@ -386,7 +468,64 @@ export function createApp(clientOrigin: string) {
       }
       await user.save();
       setSessionCookie(res, createToken({ sub: user.id, ver: user.sessionVersion }));
-      res.json({ email: user.email });
+      res.json({ email: user.email, role: user.role ?? "admin" });
+    })
+  );
+
+  // Utilisateurs (administrateurs uniquement)
+  admin.get(
+    "/users",
+    requireAdmin,
+    h(async (req: AuthedRequest, res) => {
+      const users = await User.find().sort({ createdAt: 1 }).lean();
+      res.json({ users: users.map((u) => publicUser(u, req.userId)), mailEnabled: mailConfigured() });
+    })
+  );
+  admin.post(
+    "/users",
+    h(async (req: AuthedRequest, res) => {
+      const body = z
+        .object({ email: z.string().trim().toLowerCase().email("Email invalide"), role: z.enum(["admin", "viewer"]) })
+        .safeParse(req.body);
+      if (!body.success) return res.status(400).json({ error: body.error.issues[0]?.message ?? "Champs invalides" });
+      if (await User.exists({ email: body.data.email })) return res.status(409).json({ error: "Cette personne a déjà un accès" });
+      const invite = newInvite();
+      const user = await User.create({ email: body.data.email, role: body.data.role, passwordHash: "", ...invite.fields });
+      const emailSent = await sendMail(inviteMail({ to: user.email, link: invite.link, role: user.role, reset: false, days: INVITE_DAYS }));
+      res.status(201).json({ user: publicUser(user.toObject(), req.userId), link: invite.link, emailSent });
+    })
+  );
+  // nouveau lien : renvoi d'une invitation, ou mot de passe oublié d'un compte actif
+  admin.post(
+    "/users/:id/invite",
+    h(async (req: AuthedRequest, res) => {
+      if (req.params.id === req.userId) return res.status(400).json({ error: "Changez votre propre mot de passe depuis « Identifiants »" });
+      const invite = newInvite();
+      const user = await User.findByIdAndUpdate(req.params.id, invite.fields, { new: true });
+      if (!user) return res.status(404).json({ error: "Utilisateur introuvable" });
+      const emailSent = await sendMail(inviteMail({ to: user.email, link: invite.link, role: user.role ?? "admin", reset: Boolean(user.passwordHash), days: INVITE_DAYS }));
+      res.json({ user: publicUser(user.toObject(), req.userId), link: invite.link, emailSent });
+    })
+  );
+  admin.patch(
+    "/users/:id",
+    h(async (req: AuthedRequest, res) => {
+      const role = z.enum(["admin", "viewer"]).safeParse(req.body?.role);
+      if (!role.success) return res.status(400).json({ error: "Rôle invalide" });
+      if (req.params.id === req.userId) return res.status(400).json({ error: "Vous ne pouvez pas changer votre propre rôle" });
+      const user = await User.findByIdAndUpdate(req.params.id, { role: role.data }, { new: true });
+      if (!user) return res.status(404).json({ error: "Utilisateur introuvable" });
+      res.json(publicUser(user.toObject(), req.userId));
+    })
+  );
+  admin.delete(
+    "/users/:id",
+    h(async (req: AuthedRequest, res) => {
+      if (req.params.id === req.userId) return res.status(400).json({ error: "Vous ne pouvez pas supprimer votre propre accès" });
+      if (!(await otherActiveAdmins(String(req.params.id)))) return res.status(400).json({ error: "Il doit rester au moins un administrateur" });
+      const deleted = await User.findByIdAndDelete(req.params.id);
+      if (!deleted) return res.status(404).json({ error: "Utilisateur introuvable" });
+      res.json({ ok: true });
     })
   );
 

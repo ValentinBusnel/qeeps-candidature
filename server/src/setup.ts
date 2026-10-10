@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { siteBase } from "./mail.js";
 
 /**
  * Première connexion : créer son compte admin directement depuis le site, sans mettre
@@ -13,9 +14,7 @@ let setupKey: string | null = null;
 
 export function prepareSetup() {
   setupKey = crypto.randomBytes(24).toString("base64url");
-  const base =
-    process.env.CLIENT_ORIGIN?.replace(/\/$/, "") ||
-    (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "http://localhost:5173");
+  const base = siteBase();
   console.log("");
   console.log("🔑 Aucun compte admin pour l'instant. Pour créer le tien, ouvre ce lien (valable jusqu'au prochain redémarrage) :");
   console.log(`   ${base}/admin/connexion?cle=${setupKey}`);

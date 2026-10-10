@@ -41,17 +41,28 @@ const messageSchema = new Schema<MessageData>(
   { timestamps: true }
 );
 
+export type UserRole = "admin" | "viewer";
+
 export interface UserData {
   email: string;
+  /** vide tant que la personne invitée n'a pas choisi son mot de passe */
   passwordHash: string;
+  /** admin : peut tout modifier ; viewer : lecture seule */
+  role: UserRole;
   sessionVersion: number;
+  /** invitation / lien de mot de passe : seule l'empreinte SHA-256 du jeton est stockée */
+  inviteTokenHash?: string;
+  inviteExpires?: Date;
 }
 
 const userSchema = new Schema<UserData>(
   {
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    passwordHash: { type: String, required: true },
-    sessionVersion: { type: Number, default: 1 }
+    passwordHash: { type: String, default: "" },
+    role: { type: String, enum: ["admin", "viewer"], default: "admin" },
+    sessionVersion: { type: Number, default: 1 },
+    inviteTokenHash: { type: String, index: true, sparse: true },
+    inviteExpires: { type: Date }
   },
   { timestamps: true }
 );

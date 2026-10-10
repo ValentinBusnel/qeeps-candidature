@@ -7,7 +7,8 @@ import { SiteModalsProvider } from "./components/SiteModals";
 import { SiteProvider } from "./content";
 import PreviewBridge from "./components/PreviewBridge";
 import Home from "./pages/Home";
-import { AuthProvider, RequireAuth } from "./admin/AuthContext";
+import { AuthProvider, RequireAdmin, RequireAuth } from "./admin/AuthContext";
+import { UsersPage } from "./admin/pages/UsersPage";
 import AdminLayout from "./admin/AdminLayout";
 import Login from "./admin/pages/Login";
 import { ConfirmProvider, ToastProvider } from "./admin/ui";
@@ -98,6 +99,14 @@ export default function App() {
             <Route path="medias" element={<MediaPage />} />
             <Route path="apparence" element={<AppearancePage />} />
             <Route path="compte" element={<AccountPage />} />
+            <Route
+              path="utilisateurs"
+              element={
+                <RequireAdmin>
+                  <UsersPage />
+                </RequireAdmin>
+              }
+            />
           </Route>
         </Route>
 

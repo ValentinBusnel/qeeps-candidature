@@ -182,6 +182,7 @@ const initials = initialsOf;
 export function MessagesPage() {
   const [messages, setMessages] = useState<InboxMessage[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
+  const { readOnly } = useAuth();
   const toast = useToast();
   const confirm = useConfirm();
 
@@ -196,7 +197,7 @@ export function MessagesPage() {
 
   async function open(m: InboxMessage) {
     setOpenId(m._id);
-    if (!m.read) await toggle(m, true);
+    if (!m.read && !readOnly) await toggle(m, true);
   }
 
   async function remove(m: InboxMessage) {
@@ -553,7 +554,7 @@ export function AppearancePage() {
    Compte
    ===================================================================== */
 export function AccountPage() {
-  const { email, setEmail } = useAuth();
+  const { email, setUser, readOnly } = useAuth();
   const toast = useToast();
   const confirm = useConfirm();
   const { reload } = useProfileDraft();
@@ -573,7 +574,7 @@ export function AccountPage() {
         email: newEmail !== email ? newEmail : undefined,
         newPassword: newPassword || undefined
       });
-      setEmail(res.email);
+      setUser(res);
       (e.target as HTMLFormElement).reset();
       toast(newPassword ? "Mot de passe changé, les autres sessions sont déconnectées" : "Compte mis à jour");
     } catch (err) {
@@ -600,7 +601,7 @@ export function AccountPage() {
     <>
       <PageHeader overline="Réglages" title="Identifiants" subtitle="L'email et le mot de passe qui ouvrent cet espace." />
       <Card title="Email et mot de passe" description="Votre mot de passe actuel est demandé pour toute modification.">
-        <form className="adm-form" onSubmit={onSubmit}>
+        <form className="adm-form" onSubmit={onSubmit} data-ro-allow>
           <TextField label="Email de connexion" type="email" value={newEmail} onChange={setNewEmail} autoComplete="username" />
           <div className="field">
             <label htmlFor="np">Nouveau mot de passe (optionnel)</label>
@@ -620,14 +621,14 @@ export function AccountPage() {
           </button>
         </form>
       </Card>
-      <Card title="Zone de danger">
+      {!readOnly && <Card title="Zone de danger">
         <div className="adm-danger">
           <p className="t-body">Revenir au contenu d'origine du fichier seed-data.ts.</p>
           <button type="button" className="btn btn--danger btn--sm" onClick={reset}>
             Réinitialiser le contenu
           </button>
         </div>
-      </Card>
+      </Card>}
     </>
   );
 }

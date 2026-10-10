@@ -198,13 +198,37 @@ export const api = {
   sendMessage: (input: MessageInput) => request<{ ok: true }>("/api/messages", json("POST", input))
 };
 
+export type Role = "admin" | "viewer";
+export interface SessionUser {
+  email: string;
+  role: Role;
+}
+export interface AdminUser {
+  _id: string;
+  email: string;
+  role: Role;
+  status: "active" | "pending";
+  inviteExpires?: string;
+  createdAt?: string;
+  me: boolean;
+}
+export interface InviteResult {
+  user: AdminUser;
+  link: string;
+  emailSent: boolean;
+}
+
 /** API admin (cookie de session) */
 export const adminApi = {
-  me: () => request<{ email: string }>("/api/auth/me"),
+  me: () => request<SessionUser>("/api/auth/me"),
   /** première connexion : faut-il créer le compte ? la clé du lien est-elle bonne ? */
   setupStatus: (key: string) => request<{ needed: boolean; keyValid: boolean; email: string }>(`/api/auth/setup?cle=${encodeURIComponent(key)}`),
-  setup: (key: string, email: string, password: string) => request<{ email: string }>("/api/auth/setup", json("POST", { key, email, password })),
-  login: (email: string, password: string) => request<{ email: string }>("/api/auth/login", json("POST", { email, password })),
+  setup: (key: string, email: string, password: string) => request<SessionUser>("/api/auth/setup", json("POST", { key, email, password })),
+  /** invitation : le lien est-il valable ? pour quel email ? */
+  inviteStatus: (token: string) =>
+    request<{ valid: boolean; email?: string; role?: Role; reset?: boolean }>(`/api/auth/invite?token=${encodeURIComponent(token)}`),
+  acceptInvite: (token: string, password: string) => request<SessionUser>("/api/auth/invite", json("POST", { token, password })),
+  login: (email: string, password: string) => request<SessionUser>("/api/auth/login", json("POST", { email, password })),
   logout: () => request<{ ok: true }>("/api/auth/logout", json("POST")),
   overview: () => request<Overview>("/api/admin/overview"),
   profile: () => request<Profile>("/api/admin/profile"),
@@ -227,7 +251,12 @@ export const adminApi = {
       { method: "POST", body: file, headers: { "Content-Type": file.type || "application/octet-stream" } }
     ),
   account: (data: { currentPassword: string; email?: string; newPassword?: string }) =>
-    request<{ email: string }>("/api/admin/account", json("PUT", data)),
+    request<SessionUser>("/api/admin/account", json("PUT", data)),
+  users: () => request<{ users: AdminUser[]; mailEnabled: boolean }>("/api/admin/users"),
+  inviteUser: (email: string, role: Role) => request<InviteResult>("/api/admin/users", json("POST", { email, role })),
+  resendInvite: (id: string) => request<InviteResult>(`/api/admin/users/${id}/invite`, json("POST")),
+  setUserRole: (id: string, role: Role) => request<AdminUser>(`/api/admin/users/${id}`, json("PATCH", { role })),
+  deleteUser: (id: string) => request<{ ok: true }>(`/api/admin/users/${id}`, json("DELETE")),
   resetContent: () => request<{ ok: true }>("/api/admin/reset-content", json("POST", { confirm: "REINITIALISER" }))
 };
 
