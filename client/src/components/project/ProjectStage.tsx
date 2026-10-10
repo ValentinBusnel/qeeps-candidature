@@ -22,6 +22,9 @@ function domainOf(project: Project) {
 /** Titre court d'un point fort : la partie avant « — ». */
 const chipOf = (highlight: string) => highlight.split(/\s[—–-]\s/)[0].trim();
 
+/** Sur téléphone, on ne précharge pas les vidéos entières (mémoire limitée sur iPhone). */
+const SMALL_SCREEN = typeof window !== "undefined" && window.matchMedia?.("(max-width: 860px)").matches;
+
 /** Petit logo de techno (28 px) avec le nom en infobulle. */
 function MiniLogo({ name, index }: { name: string; index: number }) {
   const src = useStackLogo(name);
@@ -288,7 +291,7 @@ export default function ProjectStage({
                   poster={m.poster}
                   muted
                   playsInline
-                  preload={i === 0 ? "auto" : "metadata"}
+                  preload={i === 0 && !SMALL_SCREEN ? "auto" : "metadata"}
                   onEnded={() => (i === active ? next() : undefined)}
                   loop={media.length === 1 && !onFinished}
                   aria-label={m.caption}

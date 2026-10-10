@@ -12,6 +12,8 @@ import "./admin-mockup.css";
  * la ligne repliée et l'aperçu changent ensemble) et le bloc de l'aperçu qui s'éclaire.
  */
 const SHOT = "/hero/admin-mon-site.webp?v=4";
+/** version légère pour les téléphones (l'image pleine taille pèse ~21 Mo une fois décodée) */
+const SHOT_SMALL = "/hero/admin-mon-site-1200.webp?v=4";
 const FULL = "Une stack complète";
 const KEEP = "Une stack ".length;
 
@@ -60,7 +62,17 @@ export default function AdminMockup() {
   return (
     <div className="mock mock--admin" aria-hidden="true">
       <div className="amock">
-        <img className="amock-shot" src={SHOT} width={1440} height={916} alt="" decoding="async" draggable={false} />
+        <img
+          className="amock-shot"
+          src={SHOT}
+          srcSet={`${SHOT_SMALL} 1200w, ${SHOT} 2880w`}
+          sizes="(max-width: 860px) 400px, 1440px"
+          width={1440}
+          height={916}
+          alt=""
+          decoding="async"
+          draggable={false}
+        />
 
         {/* le point « Aperçu en direct » */}
         <span className="amock-pulse" style={box(908, 124, 8, 8)} />

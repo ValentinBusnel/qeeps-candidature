@@ -287,7 +287,20 @@ function ExperienceLoop({ rows }: { rows: LoopRow[] }) {
     let last = performance.now();
     let raf = 0;
 
+    // hors de l'écran : on ne calcule plus rien (économise batterie et mémoire sur mobile)
+    let visible = true;
+    const io = new IntersectionObserver(([e]) => {
+      const was = visible;
+      visible = e.isIntersecting;
+      if (visible && !was) {
+        last = performance.now();
+        raf = requestAnimationFrame(tick);
+      }
+    });
+    io.observe(viewport);
+
     const tick = (now: number) => {
+      if (!visible) return;
       const dt = Math.min(0.064, (now - last) / 1000);
       last = now;
       const target = reduce ? 0 : hoveringRef.current ? LOOP_SPEED * LOOP_HOVER_FACTOR : LOOP_SPEED;
@@ -307,7 +320,10 @@ function ExperienceLoop({ rows }: { rows: LoopRow[] }) {
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      io.disconnect();
+    };
   }, [rows.length]);
 
   if (!rows.length) return null;

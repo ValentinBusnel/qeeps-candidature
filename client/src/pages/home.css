@@ -857,3 +857,17 @@ img.profile__avatar { display: block; object-fit: cover; background: #B7ECC5; }
 .profile__card .tilt-glare {
   background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(22, 73, 81, 0.05), transparent 60%);
 }
+
+/* ======================================================================
+   Téléphones : on allège ce qui coûte cher en mémoire graphique
+   (iPhone ferme l'onglet — écran noir puis rechargement — quand la page en demande trop)
+   ====================================================================== */
+@media (max-width: 860px) {
+  .hero__blur {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: linear-gradient(rgba(247, 247, 247, 0), rgba(247, 247, 247, 0.92) 45%, var(--color-bg));
+  }
+  .marquee__track, .hero__tilt, .profile__card, .xploop__track, .edu-card, .doc-card, .doc-card__halo, .pstage__frame { will-change: auto; }
+  .xploop__item { filter: none !important; }
+}
