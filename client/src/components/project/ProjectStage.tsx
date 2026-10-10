@@ -3,7 +3,7 @@ import type { Project, ProjectMedia } from "../../api";
 import { Icon } from "../Icons";
 import { useSite } from "../../content";
 import { useTilt } from "../motion";
-import { stackLogo } from "../../lib/stackLogos";
+import { useStackLogo } from "../../lib/stackLogos";
 import "./project-stage.css";
 
 const IMAGE_DURATION = 6000; // une capture reste 6 s à l'écran avant de passer à la suivante
@@ -24,12 +24,13 @@ const chipOf = (highlight: string) => highlight.split(/\s[—–-]\s/)[0].trim()
 
 /** Petit logo de techno (28 px) avec le nom en infobulle. */
 function MiniLogo({ name, index }: { name: string; index: number }) {
-  const src = stackLogo(name);
-  const [failed, setFailed] = useState(false);
+  const src = useStackLogo(name);
+  const [failedSrc, setFailed] = useState<string | null>(null);
+  const failed = failedSrc === src;
   return (
     <span className="pstage__tech" title={name} style={{ "--t": index } as CSSProperties}>
       {src && !failed ? (
-        <img src={src} alt={name} draggable={false} onError={() => setFailed(true)} />
+        <img src={src} alt={name} draggable={false} onError={() => setFailed(src)} />
       ) : (
         <span className="pstage__tech-name">{name}</span>
       )}

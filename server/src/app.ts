@@ -86,6 +86,15 @@ const settingsSchema = z.object({
   colors: z.record(z.string().regex(/^--[a-z0-9-]+$/), z.string().regex(/^#[0-9a-fA-F]{6}$/))
 });
 
+/** même normalisation que le client (lib/stackLogos.ts) : « Ruby on Rails » → « rubyonrails » */
+const normStack = (name: string) =>
+  name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "")
+    .slice(0, 60);
+
 /* ---------- Invitations ---------- */
 const INVITE_DAYS = 7;
 const sha256 = (t: string) => crypto.createHash("sha256").update(t).digest("hex");
@@ -125,7 +134,17 @@ export function createApp(clientOrigin: string) {
   app.disable("x-powered-by");
   app.set("trust proxy", 1);
   app.use(cors({ origin: clientOrigin, credentials: true }));
-  app.use("/uploads", express.static(UPLOAD_DIR, { maxAge: "7d", fallthrough: false }));
+  app.use(
+    "/uploads",
+    express.static(UPLOAD_DIR, {
+      maxAge: "7d",
+      fallthrough: false,
+      // un SVG ouvert directement ne peut rien exécuter
+      setHeaders: (res, file) => {
+        if (file.endsWith(".svg")) res.setHeader("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox");
+      }
+    })
+  );
 
   // L'upload lit le corps brut ; il est déclaré avant express.json
   const auth = requireAuth((id) => User.findById(id).lean());
@@ -179,6 +198,16 @@ export function createApp(clientOrigin: string) {
     h(async (_req, res) => {
       if (!isDbConnected()) return res.json(settingsSeed);
       res.json((await Settings.findOne().lean()) ?? settingsSeed);
+    })
+  );
+
+  // logos des technologies choisis dans l'admin (nom normalisé → URL)
+  app.get(
+    "/api/stack-logos",
+    h(async (_req, res) => {
+      if (!isDbConnected()) return res.json({});
+      const settings = await Settings.findOne().lean();
+      res.json((settings as { stackLogos?: Record<string, string> } | null)?.stackLogos ?? {});
     })
   );
 
@@ -406,6 +435,29 @@ export function createApp(clientOrigin: string) {
       const parsed = settingsSchema.safeParse(req.body);
       if (!parsed.success) return res.status(400).json({ error: "Couleurs invalides (format #RRGGBB)" });
       res.json(await Settings.findOneAndUpdate({}, parsed.data, { new: true, upsert: true, lean: true }));
+    })
+  );
+
+  // Logo d'une technologie (catalogue ou fichier envoyé) ; url null = revenir au logo par défaut
+  admin.put(
+    "/stack-logos",
+    h(async (req, res) => {
+      const body = z
+        .object({
+          name: z.string().trim().min(1).max(80),
+          url: z
+            .string()
+            .max(300)
+            .regex(/^(\/uploads\/[\w./-]+|\/stack-logos\/[\w.-]+|https:\/\/cdn\.jsdelivr\.net\/[\w@./-]+)$/, "Adresse de logo invalide")
+            .nullable()
+        })
+        .safeParse(req.body);
+      if (!body.success) return res.status(400).json({ error: body.error.issues[0]?.message ?? "Logo invalide" });
+      const key = normStack(body.data.name);
+      if (!key) return res.status(400).json({ error: "Nom invalide" });
+      const update = body.data.url ? { $set: { [`stackLogos.${key}`]: body.data.url } } : { $unset: { [`stackLogos.${key}`]: "" } };
+      const settings = await Settings.findOneAndUpdate({}, update, { new: true, upsert: true, lean: true });
+      res.json((settings as { stackLogos?: Record<string, string> } | null)?.stackLogos ?? {});
     })
   );
 

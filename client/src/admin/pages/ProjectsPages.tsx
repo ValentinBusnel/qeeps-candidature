@@ -4,6 +4,7 @@ import { Empty } from "./OtherPages";
 import { statusTone } from "../ui";
 import { adminApi, type Project, type ProjectMedia } from "../../api";
 import { Icon } from "../../components/Icons";
+import { StackField } from "../StackField";
 import {
   Card,
   DropZone,
@@ -14,7 +15,6 @@ import {
   PageHeader,
   Repeater,
   Select,
-  TagsField,
   TextArea,
   TextField,
   Toggle,
@@ -390,7 +390,7 @@ export function ProjectEditPage() {
           </Card>
 
           <Card title="Technologies & liens">
-            <TagsField label="Stack technique" value={draft.stack} onChange={(v) => up({ stack: v })} />
+            <StackField label="Stack technique" value={draft.stack} onChange={(v) => up({ stack: v })} />
             <Repeater
               items={draft.links}
               onChange={(links) => up({ links })}

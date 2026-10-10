@@ -13,6 +13,7 @@ export const ALLOWED_TYPES: Record<string, string> = {
   "image/jpeg": ".jpg",
   "image/webp": ".webp",
   "image/gif": ".gif",
+  "image/svg+xml": ".svg",
   "video/mp4": ".mp4",
   "video/webm": ".webm",
   "video/quicktime": ".mov",
@@ -35,6 +36,10 @@ function slugify(value: string) {
 export async function saveUpload(body: Buffer, mime: string, originalName: string, folder: string) {
   const ext = ALLOWED_TYPES[mime];
   if (!ext) throw new Error("Type de fichier non autorisé");
+  // un SVG peut contenir du code : on n'accepte que des dessins (logos)
+  if (ext === ".svg" && /<script|<foreignObject|\son[a-z]+\s*=|javascript:|<iframe|<embed|<object/i.test(body.toString("utf8"))) {
+    throw new Error("Ce SVG contient du code : seuls les dessins sont acceptés");
+  }
   const safeFolder = slugify(folder) || "divers";
   const base = slugify(path.parse(originalName).name) || "fichier";
   const name = `${base}-${crypto.randomBytes(3).toString("hex")}${ext}`;

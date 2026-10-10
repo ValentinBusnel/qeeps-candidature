@@ -18,7 +18,11 @@ const projectSchema = new Schema<ProjectData>(
 );
 
 const settingsSchema = new Schema<SettingsData>(
-  { colors: { type: Schema.Types.Mixed, default: {} }, migrations: { type: [String], default: [] } },
+  {
+    colors: { type: Schema.Types.Mixed, default: {} },
+    migrations: { type: [String], default: [] },
+    stackLogos: { type: Schema.Types.Mixed, default: {} }
+  },
   { timestamps: true, minimize: false }
 );
 

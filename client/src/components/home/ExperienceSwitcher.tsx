@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import type { Experience } from "../../api";
 import { Icon } from "../Icons";
 import { useSite } from "../../content";
-import { stackLogo } from "../../lib/stackLogos";
+import { useStackLogo } from "../../lib/stackLogos";
 import "./experience.css";
 
 /* ---------- Dates : « Oct. 2023 – Fév. 2026 » → mois absolus ---------- */
@@ -59,11 +59,12 @@ function Rolling({ value }: { value: number }) {
 }
 
 function Tech({ name, i }: { name: string; i: number }) {
-  const src = stackLogo(name);
-  const [failed, setFailed] = useState(false);
+  const src = useStackLogo(name);
+  const [failedSrc, setFailed] = useState<string | null>(null);
+  const failed = failedSrc === src;
   return (
     <span className="xps__tech" title={name} style={{ "--i": i } as CSSProperties}>
-      {src && !failed ? <img src={src} alt="" onError={() => setFailed(true)} /> : null}
+      {src && !failed ? <img src={src} alt="" onError={() => setFailed(src)} /> : null}
       <span>{name}</span>
     </span>
   );

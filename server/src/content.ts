@@ -37,7 +37,7 @@ export async function importBundledContent(migrations: string[]): Promise<boolea
   if (bundle.projects?.length) await Project.insertMany(bundle.projects.map(clean));
   await Settings.deleteMany({});
   // le contenu embarqué est déjà à jour : aucune modification ponctuelle à rejouer
-  await Settings.create({ colors: (bundle.settings?.colors as Obj) ?? {}, migrations });
+  await Settings.create({ colors: (bundle.settings?.colors as Obj) ?? {}, stackLogos: (bundle.settings?.stackLogos as Obj) ?? {}, migrations });
   console.log(`📦 Contenu embarqué importé (${bundle.projects?.length ?? 0} projets)`);
   return true;
 }
@@ -73,7 +73,7 @@ export async function exportContent() {
   if (!profile) throw new Error("Aucun profil en base : rien à exporter");
   const projects = await Project.find().sort({ order: 1 }).lean<Obj[]>();
   const settings = await Settings.findOne().lean<Obj>();
-  const bundle = { profile, projects, settings: { colors: settings?.colors ?? {} } };
+  const bundle = { profile, projects, settings: { colors: settings?.colors ?? {}, stackLogos: settings?.stackLogos ?? {} } };
 
   // fichiers réellement utilisés par le site (les autres restent sur ton ordinateur)
   const used = [...new Set(JSON.stringify(bundle).match(/\/uploads\/[^"\\?#]+/g) ?? [])];

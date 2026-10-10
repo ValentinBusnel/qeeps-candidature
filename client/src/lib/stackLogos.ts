@@ -1,3 +1,5 @@
+import { useSyncExternalStore } from "react";
+
 /**
  * Logos officiels des technologies (devicon + simple-icons, licences MIT / CC0),
  * stockés dans client/public/stack-logos/. Une technologie absente de la liste
@@ -65,15 +67,71 @@ const LOGOS: Record<string, string> = {
   neon: "postgresql"
 };
 
-const normalize = (name: string) =>
+export const normalizeStack = (name: string) =>
   name
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]/g, "");
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "")
+    .slice(0, 60);
+
+/* ---------- Logos choisis dans l'admin (catalogue ou fichier envoyé) ----------
+ * Stockés côté serveur (GET /api/stack-logos), chargés une fois, partagés entre l'admin
+ * et son aperçu (BroadcastChannel) pour que l'aperçu se mette à jour aussitôt. */
+let custom: Record<string, string> = {};
+let loaded = false;
+const listeners = new Set<() => void>();
+const channel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("stack-logos") : null;
+
+function emit() {
+  custom = { ...custom };
+  listeners.forEach((l) => l());
+}
+
+channel?.addEventListener("message", (e) => {
+  if (e.data && typeof e.data === "object") {
+    custom = e.data as Record<string, string>;
+    emit();
+  }
+});
+
+function load() {
+  if (loaded || typeof window === "undefined") return;
+  loaded = true;
+  fetch("/api/stack-logos", { credentials: "same-origin" })
+    .then((r) => (r.ok ? r.json() : {}))
+    .then((map: Record<string, string>) => {
+      custom = { ...map, ...custom };
+      emit();
+    })
+    .catch(() => {});
+}
+
+/** Mise à jour locale (après enregistrement côté serveur) : tout le monde la voit aussitôt. */
+export function setStackLogos(map: Record<string, string>) {
+  custom = { ...map };
+  loaded = true;
+  emit();
+  channel?.postMessage(custom);
+}
+
+export function subscribeStackLogos(cb: () => void) {
+  load();
+  listeners.add(cb);
+  return () => listeners.delete(cb);
+}
+export const getStackLogos = () => custom;
 
 /** URL du logo d'une technologie, ou null s'il n'y en a pas. */
 export function stackLogo(name: string): string | null {
-  const slug = LOGOS[normalize(name)];
+  const key = normalizeStack(name);
+  if (custom[key]) return custom[key];
+  const slug = LOGOS[key];
   return slug ? `/stack-logos/${slug}.svg` : null;
+}
+
+/** Même chose, en se mettant à jour quand un logo est ajouté ou chargé. */
+export function useStackLogo(name: string): string | null {
+  useSyncExternalStore(subscribeStackLogos, getStackLogos, getStackLogos);
+  return stackLogo(name);
 }

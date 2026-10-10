@@ -250,6 +250,8 @@ export const adminApi = {
       `/api/admin/uploads?name=${encodeURIComponent(file.name)}&folder=${encodeURIComponent(folder)}`,
       { method: "POST", body: file, headers: { "Content-Type": file.type || "application/octet-stream" } }
     ),
+  /** logo d'une technologie (null = logo par défaut) ; renvoie toute la table */
+  setStackLogo: (name: string, url: string | null) => request<Record<string, string>>("/api/admin/stack-logos", json("PUT", { name, url })),
   account: (data: { currentPassword: string; email?: string; newPassword?: string }) =>
     request<SessionUser>("/api/admin/account", json("PUT", data)),
   users: () => request<{ users: AdminUser[]; mailEnabled: boolean }>("/api/admin/users"),

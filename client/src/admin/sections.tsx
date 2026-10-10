@@ -5,6 +5,7 @@ import { ABOUT_DEFAULT } from "../components/SiteModals";
 import { TEXTS, TEXT_GROUPS, textDefault, type TextKey } from "../content";
 import { Icon } from "../components/Icons";
 import { Card, FileField, Grid, LinesField, NumberField, Repeater, Select, TagsField, TextArea, TextField } from "./ui";
+import { StackField } from "./StackField";
 
 /**
  * Le site, section par section, dans l'ordre où on le lit. Chaque entrée sait :
@@ -122,7 +123,7 @@ export const SECTIONS: SectionDef[] = [
     Editor: ({ p, set }) => (
       <>
         <HeadingFields value={p.sections.stack} onChange={(v) => setSection(p, set)("stack", v)} />
-        <Card title="Technologies" description="Tapez un nom puis Entrée. Glissez une étiquette pour la déplacer.">
+        <Card title="Technologies" description="Tapez quelques lettres : choisissez dans la liste, le logo suit. Une techno inconnue s'ajoute aussi (cliquez sur son logo pour en mettre un). Glissez une étiquette pour la déplacer.">
           <Repeater
             items={p.skills}
             onChange={(v) => set("skills", v)}
@@ -133,7 +134,7 @@ export const SECTIONS: SectionDef[] = [
             render={(g, up) => (
               <>
                 <TextField label="Catégorie" value={g.category} onChange={(v) => up({ category: v })} />
-                <TagsField label="Technologies" value={g.items} onChange={(v) => up({ items: v })} />
+                <StackField label="Technologies" value={g.items} onChange={(v) => up({ items: v })} />
               </>
             )}
           />
@@ -225,7 +226,7 @@ export const SECTIONS: SectionDef[] = [
                     </>
                   )}
                 />
-                <TagsField label="Outils utilisés" value={x.env} onChange={(v) => up({ env: v })} />
+                <StackField label="Outils utilisés" value={x.env} onChange={(v) => up({ env: v })} />
               </>
             )}
           />

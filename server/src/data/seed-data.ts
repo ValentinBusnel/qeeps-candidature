@@ -369,6 +369,8 @@ export const profileSeed: ProfileData = {
 export interface SettingsData {
   colors: Record<string, string>;
   migrations?: string[];
+  /** logos choisis dans l'admin pour les technologies : nom normalisé → URL */
+  stackLogos?: Record<string, string>;
 }
 
 export const settingsSeed: SettingsData = { colors: {}, migrations: ["2026-10-07-retire-6-technos"] };
