@@ -5,6 +5,7 @@ import { Profile, Project, Settings, User } from "./models.js";
 import { DOCS_BLOCK, DOCUMENTS_SEED, profileSeed, projectsSeed, settingsSeed, SEED_VERSION } from "./data/seed-data.js";
 import { hashPassword } from "./auth.js";
 import { importBundledContent } from "./content.js";
+import { prepareSetup } from "./setup.js";
 
 type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -422,9 +423,8 @@ export async function ensureAdmin() {
   const email = process.env.ADMIN_EMAIL?.trim();
   const password = process.env.ADMIN_PASSWORD ?? "";
   if (!email || password.length < 10) {
-    console.warn(
-      "⚠️  Aucun compte admin : renseigne ADMIN_EMAIL et ADMIN_PASSWORD (10 caractères min.) dans server/.env puis redémarre."
-    );
+    // pas de mot de passe fourni : le compte se crée depuis le site, avec une clé à usage unique
+    prepareSetup();
     return;
   }
   await User.create({ email, passwordHash: hashPassword(password) });

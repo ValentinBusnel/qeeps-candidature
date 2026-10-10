@@ -201,6 +201,9 @@ export const api = {
 /** API admin (cookie de session) */
 export const adminApi = {
   me: () => request<{ email: string }>("/api/auth/me"),
+  /** première connexion : faut-il créer le compte ? la clé du lien est-elle bonne ? */
+  setupStatus: (key: string) => request<{ needed: boolean; keyValid: boolean; email: string }>(`/api/auth/setup?cle=${encodeURIComponent(key)}`),
+  setup: (key: string, email: string, password: string) => request<{ email: string }>("/api/auth/setup", json("POST", { key, email, password })),
   login: (email: string, password: string) => request<{ email: string }>("/api/auth/login", json("POST", { email, password })),
   logout: () => request<{ ok: true }>("/api/auth/logout", json("POST")),
   overview: () => request<Overview>("/api/admin/overview"),

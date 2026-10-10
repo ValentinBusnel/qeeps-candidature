@@ -28,7 +28,7 @@ Tout le contenu se modifie sur **http://localhost:5173/admin** : profil, textes 
 compétences, expériences, formation, chiffres, projets (photos et vidéos), messages reçus,
 médiathèque, couleurs et compte.
 
-- Le compte admin est créé au premier démarrage à partir de `ADMIN_EMAIL` / `ADMIN_PASSWORD`
+- Sans `ADMIN_PASSWORD`, le compte admin se crée depuis le site : au premier démarrage, le serveur affiche dans ses journaux un lien `/admin/connexion?cle=…` à usage unique (sinon il est créé à partir de `ADMIN_EMAIL` / `ADMIN_PASSWORD`)
   dans `server/.env`. Ensuite, email et mot de passe se changent dans *Admin > Compte*.
 - Les fichiers envoyés sont stockés dans `server/uploads/` (servis sur `/uploads`).
 - `server/src/data/seed-data.ts` ne sert qu'à remplir une base vide ; `npm run seed` remet tout à zéro.
@@ -70,7 +70,7 @@ Un seul service Node sert l'API **et** le site (`client/dist`), avec MongoDB et 
    | `UPLOAD_DIR` | `/data/uploads` |
    | `CLIENT_ORIGIN` | l'adresse publique du site (ex. `https://….up.railway.app`) |
    | `SESSION_SECRET` | 64 caractères aléatoires |
-   | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | le compte admin créé au premier démarrage |
+   | `ADMIN_EMAIL` | email proposé pour le compte admin (le mot de passe se choisit sur le site via le lien 🔑 des journaux) |
 
 4. *Settings → Networking → Generate Domain*.
 

@@ -20,6 +20,7 @@ import {
 } from "./auth.js";
 import { ALLOWED_TYPES, MAX_UPLOAD_BYTES, UPLOAD_DIR, deleteUpload, listUploads, saveUpload } from "./uploads.js";
 import { runSeed } from "./seed.js";
+import { checkSetupKey, consumeSetupKey } from "./setup.js";
 import path from "node:path";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -178,6 +179,47 @@ export function createApp(clientOrigin: string) {
       resetLoginFailures(ip);
       setSessionCookie(res, createToken({ sub: user.id, ver: user.sessionVersion }));
       res.json({ email: user.email });
+    })
+  );
+
+  // Première connexion : y a-t-il déjà un compte ? (sinon la page de connexion propose d'en créer un)
+  app.get(
+    "/api/auth/setup",
+    h(async (req, res) => {
+      if (!isDbConnected()) return res.json({ needed: false });
+      const needed = (await User.countDocuments()) === 0;
+      const key = String(req.query.cle ?? "");
+      res.json({ needed, keyValid: needed && key ? checkSetupKey(key) : false, email: needed ? process.env.ADMIN_EMAIL ?? "" : "" });
+    })
+  );
+
+  // Création du premier compte avec la clé à usage unique affichée dans les journaux du serveur
+  app.post(
+    "/api/auth/setup",
+    needDb,
+    h(async (req, res) => {
+      if (req.get("X-Requested-With") !== "admin") return res.status(403).json({ error: "Requête refusée" });
+      const ip = req.ip ?? "unknown";
+      if (!loginAllowed(ip)) return res.status(429).json({ error: "Trop de tentatives, réessaie dans 15 minutes" });
+      if ((await User.countDocuments()) > 0) return res.status(409).json({ error: "Le compte admin existe déjà : connecte-toi." });
+      const body = z
+        .object({
+          key: z.string().min(1),
+          email: z.string().trim().toLowerCase().email("Email invalide"),
+          password: z.string().min(10, "Le mot de passe doit faire au moins 10 caractères").max(200)
+        })
+        .safeParse(req.body);
+      if (!body.success) return res.status(400).json({ error: body.error.issues[0]?.message ?? "Champs invalides" });
+      if (!checkSetupKey(body.data.key)) {
+        recordLoginFailure(ip);
+        return res.status(403).json({ error: "Clé de première connexion invalide : ouvre le lien affiché dans les journaux du serveur." });
+      }
+      const user = await User.create({ email: body.data.email, passwordHash: hashPassword(body.data.password) });
+      consumeSetupKey();
+      resetLoginFailures(ip);
+      console.log(`🔐 Compte admin créé depuis le site pour ${user.email}`);
+      setSessionCookie(res, createToken({ sub: user.id, ver: user.sessionVersion }));
+      res.status(201).json({ email: user.email });
     })
   );
 
