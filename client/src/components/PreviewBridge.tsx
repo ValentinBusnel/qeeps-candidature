@@ -251,9 +251,11 @@ export default function PreviewBridge() {
       if (target.startsWith("#")) {
         return whenReady(target.slice(1), (el) => {
           const isSection = el?.tagName === "SECTION";
-          scrollToEl(el, isSection ? "start" : "center");
+          // un élément placé dans un grand bloc gris (ex. « Ma candidature ») : tout le bloc
+          const block = isSection ? el : el?.closest<HTMLElement>(".feature") ?? el;
+          scrollToEl(block, isSection ? "start" : "center");
           // une section : toute la section, comme un clic dans l'aperçu
-          spotlight(el);
+          spotlight(block);
         });
       }
     };
