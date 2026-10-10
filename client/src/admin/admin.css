@@ -1492,3 +1492,23 @@ html.is-preview::-webkit-scrollbar { display: none; }
 .adm-stack__opt.is-custom .adm-stack__icon { background: color-mix(in srgb, var(--color-primary-light) 10%, white); box-shadow: none; }
 .adm-stack__info { display: flex; align-items: center; gap: 10px; padding: 10px; font-size: 13px; color: var(--color-muted); }
 .adm--readonly .adm-main .adm-stack__x { display: none; }
+
+/* fichiers inutilisés */
+.adm-unused {
+  display: flex; align-items: center; gap: 12px;
+  margin: 0 16px 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fbf6ec;
+}
+.adm-unused p { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.adm-unused strong { font-size: 13.5px; font-weight: 600; color: var(--color-primary); }
+.adm-unused small { font-size: 12px; color: var(--color-subtle); }
+.adm-file.is-unused .adm-file__shot > :is(img, video) { opacity: 0.45; filter: grayscale(0.6); }
+.adm-file__unused {
+  position: absolute; top: 6px; left: 6px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #f6e9d3; color: #94681f;
+  font-size: 10.5px; font-weight: 600;
+}

@@ -19,7 +19,7 @@ import {
   verifyPassword,
   type AuthedRequest
 } from "./auth.js";
-import { ALLOWED_TYPES, MAX_UPLOAD_BYTES, UPLOAD_DIR, deleteUpload, listUploads, saveUpload } from "./uploads.js";
+import { ALLOWED_TYPES, MAX_UPLOAD_BYTES, deleteUnusedUploads, deleteUpload, listUploads, saveUpload, serveUpload } from "./uploads.js";
 import { runSeed } from "./seed.js";
 import { checkSetupKey, consumeSetupKey } from "./setup.js";
 import { inviteMail, mailConfigured, sendMail, siteBase } from "./mail.js";
@@ -134,22 +134,14 @@ export function createApp(clientOrigin: string) {
   app.disable("x-powered-by");
   app.set("trust proxy", 1);
   app.use(cors({ origin: clientOrigin, credentials: true }));
-  app.use(
-    "/uploads",
-    express.static(UPLOAD_DIR, {
-      maxAge: "7d",
-      fallthrough: false,
-      // un SVG ouvert directement ne peut rien exécuter
-      setHeaders: (res, file) => {
-        if (file.endsWith(".svg")) res.setHeader("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox");
-      }
-    })
-  );
 
   // L'upload lit le corps brut ; il est déclaré avant express.json
   const auth = requireAuth((id) => User.findById(id).lean());
   const needDb = (_req: Request, res: Response, next: NextFunction) =>
     isDbConnected() ? next() : res.status(503).json({ error: "Base de données indisponible" });
+
+  // fichiers du site : servis depuis la base de données (GridFS)
+  app.get("/uploads/*", needDb, h(serveUpload));
 
   app.post(
     "/api/admin/uploads",
@@ -481,6 +473,11 @@ export function createApp(clientOrigin: string) {
 
   // Médias
   admin.get("/uploads", h(async (_req, res) => res.json(await listUploads())));
+  // supprime les fichiers qui ne sont utilisés nulle part sur le site
+  admin.post(
+    "/uploads/cleanup",
+    h(async (_req, res) => res.json(await deleteUnusedUploads()))
+  );
   admin.delete(
     "/uploads",
     h(async (req, res) => {

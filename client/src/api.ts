@@ -153,6 +153,8 @@ export interface UploadedFile {
   folder: string;
   name: string;
   modified: string;
+  /** utilisé quelque part sur le site (profil, projets, logos…) */
+  used: boolean;
 }
 
 export interface Overview {
@@ -244,6 +246,7 @@ export const adminApi = {
   markMessage: (id: string, read: boolean) => request<InboxMessage>(`/api/admin/messages/${id}`, json("PATCH", { read })),
   deleteMessage: (id: string) => request<{ ok: true }>(`/api/admin/messages/${id}`, json("DELETE")),
   uploads: () => request<UploadedFile[]>("/api/admin/uploads"),
+  cleanupUploads: () => request<{ count: number; bytes: number }>("/api/admin/uploads/cleanup", json("POST")),
   deleteUpload: (url: string) => request<{ ok: true }>(`/api/admin/uploads?url=${encodeURIComponent(url)}`, json("DELETE")),
   upload: (file: File, folder: string) =>
     request<{ url: string; size: number; type: string }>(

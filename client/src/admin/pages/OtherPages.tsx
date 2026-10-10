@@ -303,7 +303,7 @@ const isVideo = (n: string) => /\.(mp4|webm|mov)$/i.test(n);
 function folderLabel(f: string) {
   if (f === "tous") return "Tous les fichiers";
   if (f.startsWith("projets-")) return f.slice(8).split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-  return ({ avatar: "Photo de profil", cv: "CV", logos: "Logos", divers: "Divers" } as Record<string, string>)[f] ?? f;
+  return ({ avatar: "Photo de profil", cv: "CV", logos: "Logos", divers: "Divers", candidature: "Ma candidature", "stack-logos": "Logos des technos", experiences: "Expériences" } as Record<string, string>)[f] ?? f;
 }
 
 export function MediaPage() {
@@ -329,8 +329,28 @@ export function MediaPage() {
   const projectFolders = folders.filter(([f]) => f.startsWith("projets-"));
   const otherFolders = folders.filter(([f]) => f !== "tous" && !f.startsWith("projets-"));
 
+  const unused = files?.filter((f) => !f.used) ?? [];
+
+  async function cleanup() {
+    const ok = await confirm({
+      title: `Supprimer ${unused.length} fichier${unused.length > 1 ? "s" : ""} inutilisé${unused.length > 1 ? "s" : ""} ?`,
+      text: `Ils n'apparaissent nulle part sur le site (${formatSize(unused.reduce((n, f) => n + f.size, 0))}). Le site ne change pas.`,
+      confirmLabel: "Faire le ménage",
+      danger: true
+    });
+    if (!ok) return;
+    try {
+      const r = await adminApi.cleanupUploads();
+      toast(`${r.count} fichier${r.count > 1 ? "s" : ""} supprimé${r.count > 1 ? "s" : ""}`);
+      setSelected(null);
+      load();
+    } catch (e) {
+      toast((e as Error).message, "error");
+    }
+  }
+
   async function remove(f: UploadedFile) {
-    if (!(await confirm({ title: `Supprimer ${f.name} ?`, text: "Les pages qui l'utilisent afficheront un emplacement vide.", confirmLabel: "Supprimer", danger: true }))) return;
+    if (!(await confirm({ title: `Supprimer ${f.name} ?`, text: f.used ? "Ce fichier est utilisé sur le site : l'endroit qui l'affiche sera vide." : "Ce fichier n'est utilisé nulle part sur le site.", confirmLabel: "Supprimer", danger: true }))) return;
     await adminApi.deleteUpload(f.url);
     setFiles((list) => list?.filter((x) => x.url !== f.url) ?? null);
     setSelected(null);
@@ -352,7 +372,7 @@ export function MediaPage() {
       <PageHeader
         overline="Images, vidéos, PDF"
         title="Fichiers"
-        subtitle={files ? `${files.length} fichier${files.length > 1 ? "s" : ""} sur le site` : undefined}
+        subtitle={files ? `${files.length - unused.length} fichier${files.length - unused.length > 1 ? "s" : ""} utilisé${files.length - unused.length > 1 ? "s" : ""} sur le site · stockés dans la base de données` : undefined}
         actions={<UploadButton folder={folder === "tous" ? "divers" : folder} multiple onUploaded={() => load()} label="Envoyer des fichiers" />}
       />
       {!files ? (
@@ -385,15 +405,34 @@ export function MediaPage() {
                 </p>
               </div>
             </header>
+            {unused.length > 0 && (
+              <div className="adm-unused">
+                <span className="adm-chip-icon adm-tone--sand">
+                  <Icon name="trash" />
+                </span>
+                <p>
+                  <strong>
+                    {unused.length} fichier{unused.length > 1 ? "s" : ""} inutilisé{unused.length > 1 ? "s" : ""}
+                  </strong>
+                  <small>
+                    {unused.length > 1 ? "Ils ne sont affichés" : "Il n'est affiché"} nulle part sur le site ({formatSize(unused.reduce((n, f) => n + f.size, 0))}).
+                  </small>
+                </p>
+                <button type="button" className="btn btn--secondary btn--sm" onClick={cleanup}>
+                  Faire le ménage
+                </button>
+              </div>
+            )}
             {shown.length === 0 ? (
               <p className="adm-pane__empty">Ce dossier est vide.</p>
             ) : (
               <div className="adm-files">
                 {shown.map((f) => (
-                  <button key={f.url} type="button" className={`adm-file ${selected === f.url ? "is-active" : ""}`} onClick={() => setSelected(selected === f.url ? null : f.url)}>
+                  <button key={f.url} type="button" className={`adm-file ${selected === f.url ? "is-active" : ""} ${f.used ? "" : "is-unused"}`} onClick={() => setSelected(selected === f.url ? null : f.url)}>
                     <span className="adm-file__shot">
                       {isImage(f.name) ? <img src={f.url} alt="" loading="lazy" /> : isVideo(f.name) ? <video src={f.url} muted preload="metadata" /> : <Icon name="folder" />}
                       {isVideo(f.name) && <span className="adm-file__kind"><Icon name="play" /></span>}
+                    {!f.used && <span className="adm-file__unused">Inutilisé</span>}
                     </span>
                     <span className="adm-file__name" title={f.name}>{f.name}</span>
                     <span className="adm-file__size">{formatSize(f.size)}</span>
@@ -410,7 +449,7 @@ export function MediaPage() {
                 </span>
                 <div className="adm-file-detail__info">
                   <strong title={current.name}>{current.name}</strong>
-                  <small>{folderLabel(current.folder)} · {formatSize(current.size)}</small>
+                  <small>{folderLabel(current.folder)} · {formatSize(current.size)} · {current.used ? "utilisé sur le site" : "inutilisé"}</small>
                 </div>
                 <div className="adm-file-detail__actions">
                   <button
