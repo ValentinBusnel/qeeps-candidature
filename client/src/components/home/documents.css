@@ -43,6 +43,8 @@
 .doc-card::before { content: ""; position: absolute; inset: -6px -6px -34px; }
 .feature--docs:hover .doc-card { --spread: 140px; --tilt: 9deg; }
 .docs__deck:has(.doc-card:hover) .doc-card:not(:hover) { opacity: 0.88; }
+/* la carte ouverte « est » la feuille de la liseuse : elle s'efface tant que la liseuse est ouverte */
+.doc-card.is-away { opacity: 0 !important; transition: none; }
 .doc-card:hover, .doc-card:focus-visible {
   --lift: 18px;
   z-index: 20;

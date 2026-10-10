@@ -138,7 +138,7 @@ export function DocsVisual({ profile }: { profile: Profile }) {
   const root = useRef<HTMLDivElement>(null);
   const cards = useRef<(HTMLButtonElement | null)[]>([]);
   const [near, setNear] = useState(false);
-  const [open, setOpen] = useState<{ index: number; from: DOMRect | null } | null>(null);
+  const [open, setOpen] = useState<{ index: number; from: CardGeo | null } | null>(null);
 
   // les miniatures PDF ne se dessinent que lorsque le bloc approche de l'écran
   useEffect(() => {
@@ -151,8 +151,7 @@ export function DocsVisual({ profile }: { profile: Profile }) {
 
   const openAt = useCallback(
     (index: number) => {
-      const card = cards.current[index]?.querySelector(".doc-card__sheet");
-      setOpen({ index, from: card ? card.getBoundingClientRect() : null });
+      setOpen({ index, from: cardGeo(cards.current[index]) });
     },
     []
   );
@@ -184,7 +183,7 @@ export function DocsVisual({ profile }: { profile: Profile }) {
               key={d.id || i}
               ref={(el) => (cards.current[i] = el)}
               type="button"
-              className="doc-card"
+              className={`doc-card ${open?.index === i ? "is-away" : ""}`}
               style={{ ...toneStyle(d), "--k": k, "--ak": Math.abs(k), "--i": i } as CSSProperties}
               onClick={() => openAt(i)}
               aria-label={`${t("docs.open")} : ${d.title}`}
@@ -220,7 +219,7 @@ export function DocsVisual({ profile }: { profile: Profile }) {
             index={open.index}
             from={open.from}
             onIndex={(index) => setOpen({ index, from: null })}
-            originOf={(i) => cards.current[i]?.querySelector(".doc-card__sheet")?.getBoundingClientRect() ?? null}
+            originOf={(i) => cardGeo(cards.current[i])}
             onClose={() => setOpen(null)}
           />,
           document.body
@@ -230,6 +229,26 @@ export function DocsVisual({ profile }: { profile: Profile }) {
 }
 
 /* ------------------------------ la liseuse ------------------------------ */
+
+/** Position réelle d'une carte du paquet : centre, largeur et inclinaison (pour l'envol de la feuille). */
+type CardGeo = { cx: number; cy: number; w: number; angle: number };
+function cardGeo(btn: HTMLElement | null | undefined): CardGeo | null {
+  const sheet = btn?.querySelector<HTMLElement>(".doc-card__sheet");
+  if (!btn || !sheet) return null;
+  let angle = 0;
+  for (const el of [btn, btn.querySelector<HTMLElement>(".doc-card__float")]) {
+    const t = el ? getComputedStyle(el).transform : "none";
+    if (t && t !== "none") {
+      const m = new DOMMatrix(t);
+      angle += Math.atan2(m.b, m.a);
+    }
+  }
+  const r = sheet.getBoundingClientRect();
+  // largeur réelle de la feuille (A4) à partir de sa boîte englobante inclinée, réductions comprises
+  const a = Math.abs(angle);
+  const w = r.width / (Math.cos(a) + Math.SQRT2 * Math.sin(a));
+  return { cx: r.left + r.width / 2, cy: r.top + r.height / 2, w, angle };
+}
 
 const OPEN_MS = 720;
 const EASE = "cubic-bezier(0.2, 0.85, 0.25, 1)";
@@ -304,9 +323,9 @@ function DocViewer({
   docs: AppDoc[];
   profile: Profile;
   index: number;
-  from: DOMRect | null;
+  from: CardGeo | null;
   onIndex: (i: number) => void;
-  originOf: (i: number) => DOMRect | null;
+  originOf: (i: number) => CardGeo | null;
   onClose: () => void;
 }) {
   const { t } = useSite();
@@ -327,17 +346,33 @@ function DocViewer({
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  /** la feuille s'envole depuis (ou vers) la carte */
-  const flip = useCallback((rect: DOMRect | null, reverse: boolean) => {
+  /**
+   * La feuille s'envole depuis (ou vers) la carte : seule sa première page est visible pendant
+   * le trajet (même format que la carte), avec la même inclinaison que la carte dans le paquet.
+   */
+  const flip = useCallback((geo: CardGeo | null, reverse: boolean) => {
     const el = sheet.current;
-    if (!el || !rect || REDUCED) return null;
+    if (!el || !geo || REDUCED) return null;
+    el.getAnimations().forEach((a) => a.cancel());
     const s = el.getBoundingClientRect();
-    const k = rect.width / s.width;
-    const frames: Keyframe[] = [
-      { transform: `translate(${rect.left - s.left}px, ${rect.top - s.top}px) scale(${k})`, borderRadius: `${12 / k}px`, opacity: 1 },
-      { transform: "none", borderRadius: "20px", opacity: 1 }
-    ];
-    return el.animate(reverse ? frames.reverse() : frames, { duration: reverse ? 520 : OPEN_MS, easing: EASE, fill: "both" });
+    const h = Math.min(s.height, s.width * Math.SQRT2);
+    const k = geo.w / s.width;
+    const dx = geo.cx - (s.left + s.width / 2);
+    const dy = geo.cy - (s.top + h / 2);
+    el.style.transformOrigin = `${s.width / 2}px ${h / 2}px`;
+    const card: Keyframe = {
+      transform: `translate(${dx}px, ${dy}px) rotate(${geo.angle}rad) scale(${k})`,
+      clipPath: `inset(0 0 ${s.height - h}px 0 round ${12 / k}px)`,
+      boxShadow: "0 10px 30px rgba(10, 40, 44, 0.18)"
+    };
+    const full: Keyframe = { transform: "none", clipPath: `inset(0 0 0 0 round 20px)`, boxShadow: "0 2px 4px rgba(10, 40, 44, 0.08), 0 30px 80px rgba(10, 40, 44, 0.3)" };
+    const a = el.animate(reverse ? [full, card] : [card, full], {
+      duration: reverse ? 560 : OPEN_MS,
+      easing: reverse ? "cubic-bezier(0.4, 0, 0.2, 1)" : EASE,
+      fill: "both"
+    });
+    if (!reverse) a.finished.then(() => (el.style.transformOrigin = ""), () => {});
+    return a;
   }, []);
 
   useLayoutEffect(() => {
@@ -362,7 +397,7 @@ function DocViewer({
       if (!done) (done = true), onClose();
     };
     a?.finished.then(finish, finish);
-    window.setTimeout(finish, a ? 700 : 260);
+    window.setTimeout(finish, a ? 760 : 260);
   }, [closing, flip, originOf, index, onClose]);
 
   const go = useCallback(

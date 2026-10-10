@@ -164,6 +164,7 @@ export default function Home() {
                 <li><Icon name="phone" /> <a href={`tel:${p.phone.replace(/\s/g, "")}`}>{p.phone}</a></li>
                 <li><Icon name="mail" /> <a href={`mailto:${p.email}`}>{p.email}</a></li>
               </ul>
+              {(p.linkedin || p.github) && (
               <div className="profile__links">
                 {p.linkedin && (
                   <a className="btn btn--secondary btn--sm" href={p.linkedin} target="_blank" rel="noreferrer">
@@ -175,12 +176,8 @@ export default function Home() {
                     <Icon name="github" /> GitHub
                   </a>
                 )}
-                {p.cvUrl && (
-                  <a className="btn btn--primary btn--sm" href={p.cvUrl} target="_blank" rel="noreferrer">
-                    <Icon name="download" /> CV
-                  </a>
-                )}
               </div>
+              )}
             </div>
             <div id="profil-text" className="profile__text">
               {p.summary.map((para, i) => (

@@ -261,10 +261,13 @@ img.profile__avatar { display: block; object-fit: cover; background: #B7ECC5; }
 .mails__slot--right1 { left: 834px; top: 10px; opacity: 0; }
 .mails__slot--right2 { left: 844px; top: 180px; opacity: 0; }
 /* Au survol, toutes les cartes sont espacées de 27 px, comme sur byqeeps.com */
-.feature--mails:hover .mails__slot--top { opacity: 1; transform: translateY(49px); }    /* -100 → bas à 47, main à 74 */
-.feature--mails:hover .mails__slot--bottom { opacity: 1; transform: translateY(-67px); } /* 264 = 74 + 163 + 27 */
-.feature--mails:hover .mails__slot--right1 { opacity: 1; transform: translate(-104px, 0); }   /* x 730 = 407 + 296 + 27 ; y 10 → 157 */
-.feature--mails:hover .mails__slot--right2 { opacity: 1; transform: translate(-114px, 4px); } /* x 730 ; y 184 = 157 + 27 */
+/* le déploiement des mails au survol : uniquement à la souris, sur grand écran (sur mobile, la pile reste fixe) */
+@media (hover: hover) and (min-width: 1200px) {
+  .feature--mails:hover .mails__slot--top { opacity: 1; transform: translateY(49px); }    /* -100 → bas à 47, main à 74 */
+  .feature--mails:hover .mails__slot--bottom { opacity: 1; transform: translateY(-67px); } /* 264 = 74 + 163 + 27 */
+  .feature--mails:hover .mails__slot--right1 { opacity: 1; transform: translate(-104px, 0); }   /* x 730 = 407 + 296 + 27 ; y 10 → 157 */
+  .feature--mails:hover .mails__slot--right2 { opacity: 1; transform: translate(-114px, 4px); } /* x 730 ; y 184 = 157 + 27 */
+}
 
 .mail {
   display: flex;
