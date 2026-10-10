@@ -96,27 +96,47 @@ function boxOf(target: HTMLElement): Box {
 }
 
 /**
- * Défilement doux piloté en JS (requestAnimationFrame) : Safari ignore souvent
- * `scrollTo({ behavior: "smooth" })` dans une iframe réduite, Chrome non. On anime donc
- * nous-mêmes la position, avec la même courbe partout.
+ * Défilement doux piloté en JS. Safari ignore `scroll-behavior: smooth` dans une iframe réduite
+ * et peut aussi suspendre `requestAnimationFrame` dans un cadre transformé : chaque image est donc
+ * demandée à la fois par rAF et par un minuteur (le premier arrivé l'emporte), et la position
+ * finale est toujours appliquée, même si l'animation n'a pas pu tourner.
  */
-let scrollRaf = 0;
+const scroller = () => (document.scrollingElement as HTMLElement | null) ?? document.documentElement;
+const currentY = () => window.scrollY || scroller().scrollTop || 0;
+function setY(y: number) {
+  window.scrollTo(0, y);
+  // filet de sécurité : certains WebKit n'appliquent pas window.scrollTo dans une iframe
+  if (Math.abs(currentY() - y) > 1) scroller().scrollTop = y;
+}
+
+let scrollRun = 0;
 function smoothScroll(to: number) {
-  cancelAnimationFrame(scrollRaf);
-  const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  const run = ++scrollRun;
+  const max = Math.max(0, scroller().scrollHeight - window.innerHeight);
   const target = Math.min(max, Math.max(0, to));
-  const from = window.scrollY;
+  const from = currentY();
   const dist = target - from;
   if (Math.abs(dist) < 1) return;
   const duration = Math.min(900, 380 + Math.abs(dist) * 0.12);
   const t0 = performance.now();
   const ease = (t: number) => 1 - Math.pow(1 - t, 3);
-  const step = (now: number) => {
-    const t = Math.min(1, (now - t0) / duration);
-    window.scrollTo(0, from + dist * ease(t));
-    if (t < 1) scrollRaf = requestAnimationFrame(step);
+  let raf = 0;
+  let timer = 0;
+  const schedule = () => {
+    raf = requestAnimationFrame(step);
+    timer = window.setTimeout(step, 20);
   };
-  scrollRaf = requestAnimationFrame(step);
+  function step() {
+    cancelAnimationFrame(raf);
+    window.clearTimeout(timer);
+    if (run !== scrollRun) return; // un autre défilement a pris le relais
+    const t = Math.min(1, (performance.now() - t0) / duration);
+    setY(from + dist * ease(t));
+    if (t < 1) schedule();
+  }
+  schedule();
+  // quoi qu'il arrive, on finit au bon endroit
+  window.setTimeout(() => run === scrollRun && setY(target), duration + 120);
 }
 
 function scrollToEl(el: Element | null, block: "start" | "center" = "start") {
@@ -124,8 +144,8 @@ function scrollToEl(el: Element | null, block: "start" | "center" = "start") {
   const r = el.getBoundingClientRect();
   const top =
     block === "center" && r.height < window.innerHeight - NAV_OFFSET
-      ? r.top + window.scrollY - (window.innerHeight - r.height) / 2
-      : r.top + window.scrollY - NAV_OFFSET;
+      ? r.top + currentY() - (window.innerHeight - r.height) / 2
+      : r.top + currentY() - NAV_OFFSET;
   smoothScroll(top);
 }
 
@@ -166,6 +186,8 @@ export default function PreviewBridge() {
   useEffect(() => {
     if (!IN_PREVIEW) return;
     document.documentElement.classList.add("is-preview");
+    // le défilement est animé en JS : aucun défilement doux natif ne doit s'y superposer (Safari)
+    document.documentElement.style.scrollBehavior = "auto";
     const go = (target: string) => {
       const { contact, modals } = ctl.current;
       const isModal = target.startsWith("modal:");
@@ -190,7 +212,7 @@ export default function PreviewBridge() {
       }
       if (target === "footer") {
         const el = document.getElementById("footer");
-        if (el) smoothScroll(el.getBoundingClientRect().bottom + window.scrollY - window.innerHeight);
+        if (el) smoothScroll(el.getBoundingClientRect().bottom + currentY() - window.innerHeight);
         return spotlight(el);
       }
       if (target.startsWith("xp:")) {
